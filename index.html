@@ -458,7 +458,9 @@
         </p>
       </div>
       <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-        <article class="case-card reveal">
+
+        <!-- ========== n8n CARD (NOW CLICKABLE) ========== -->
+        <a href="n8n-case-study.html" class="case-card reveal block group" style="text-decoration: none; color: inherit;">
           <div class="relative z-10 p-8">
             <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-[var(--accent-secondary)] to-[var(--accent)] flex items-center justify-center mb-6">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -476,8 +478,17 @@
                 <span class="px-3 py-1 text-xs rounded-full bg-[rgba(255,0,110,0.1)] text-[var(--accent-secondary)] border border-[rgba(255,0,110,0.2)]">Follow-ups</span>
               </div>
             </div>
+            <!-- VIEW CASE STUDY BUTTON -->
+            <div class="mt-6 flex items-center gap-2 text-[var(--accent-secondary)] font-semibold text-sm transition-all">
+              <span>View Case Study</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="transition-transform group-hover:translate-x-1">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
+            </div>
           </div>
-        </article>
+        </a>
+
+        <!-- ========== CLAY CARD (UNCHANGED) ========== -->
         <article class="case-card reveal reveal-delay-1">
           <div class="relative z-10 p-8">
             <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-[var(--accent-tertiary)] to-[var(--accent)] flex items-center justify-center mb-6">
@@ -499,6 +510,7 @@
             </div>
           </div>
         </article>
+
       </div>
     </div>
   </section>
@@ -911,6 +923,3 @@
   </script>
 </body>
 </html>
-
-
-
