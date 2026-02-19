@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Job Scraper — Tony Adijah</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #050505;
+      --bg-elevated: #0a0a0a;
+      --fg: #ffffff;
+      --muted: #6b6b7b;
+      --accent: #00ff88;
+      --accent-secondary: #ff006e;
+      --accent-tertiary: #00d4ff;
+      --card: #111111;
+      --border: #222222;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--fg); line-height: 1.6; overflow-x: hidden; }
+    .font-display { font-family: 'Space Grotesk', sans-serif; }
+
+    /* ===== CUSTOM CURSOR ===== */
+    .cursor-dot {
+      position: fixed; width: 8px; height: 8px; background: var(--accent); border-radius: 50%;
+      pointer-events: none; z-index: 99999; transform: translate(-50%, -50%);
+      transition: width 0.3s ease, height 0.3s ease, background 0.3s ease, opacity 0.3s ease;
+      box-shadow: 0 0 10px var(--accent), 0 0 20px rgba(0, 255, 136, 0.3);
+    }
+    .cursor-dot.cursor-hover { width: 16px; height: 16px; background: var(--accent-secondary); box-shadow: 0 0 15px var(--accent-secondary), 0 0 30px rgba(255, 0, 110, 0.3); }
+    .cursor-dot.cursor-hidden { opacity: 0; width: 0; height: 0; }
+
+    .cursor-ring {
+      position: fixed; width: 40px; height: 40px; border: 2px solid rgba(0, 255, 136, 0.5); border-radius: 50%;
+      pointer-events: none; z-index: 99998; transform: translate(-50%, -50%);
+      transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1), height 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, opacity 0.3s ease, background 0.3s ease;
+    }
+    .cursor-ring.cursor-hover { width: 60px; height: 60px; border-color: rgba(255, 0, 110, 0.4); background: rgba(255, 0, 110, 0.05); }
+    .cursor-ring.cursor-hidden { opacity: 0; width: 0; height: 0; }
+
+    .cursor-trail { position: fixed; width: 6px; height: 6px; border-radius: 50%; pointer-events: none; z-index: 99997; transform: translate(-50%, -50%); opacity: 0; }
+
+    .cursor-glow {
+      position: fixed; width: 400px; height: 400px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(0, 255, 136, 0.12) 0%, transparent 70%);
+      pointer-events: none; z-index: 1; transform: translate(-50%, -50%); transition: opacity 0.3s ease; mix-blend-mode: screen;
+    }
+
+    .magnetic-target { transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+
+    /* ===== BACKGROUND ===== */
+    .gradient-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: hidden; }
+    .gradient-orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.5; animation: orbFloat 15s ease-in-out infinite; }
+    .orb-1 { width: 600px; height: 600px; background: var(--accent-secondary); top: -200px; right: -200px; animation-delay: 0s; }
+    .orb-2 { width: 500px; height: 500px; background: var(--accent); bottom: -150px; left: -150px; animation-delay: -5s; }
+    .orb-3 { width: 400px; height: 400px; background: var(--accent-tertiary); top: 50%; left: 50%; transform: translate(-50%, -50%); animation-delay: -10s; }
+    @keyframes orbFloat { 0%, 100% { transform: translate(0, 0) scale(1); } 25% { transform: translate(50px, -50px) scale(1.1); } 50% { transform: translate(-30px, 30px) scale(0.9); } 75% { transform: translate(40px, 20px) scale(1.05); } }
+
+    .grid-pattern { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px); background-size: 60px 60px; mask-image: radial-gradient(ellipse at center, black 0%, transparent 70%); }
+
+    /* ===== ANIMATIONS ===== */
+    .reveal { opacity: 0; transform: translateY(60px); transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1); }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+    .reveal-delay-4 { transition-delay: 0.4s; }
+    .reveal-delay-5 { transition-delay: 0.5s; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .reveal { opacity: 1; transform: none; transition: none; }
+      .gradient-orb, .text-shimmer, .text-shimmer-secondary, .node-pulse, .data-flow { animation: none !important; }
+      .cursor-dot, .cursor-ring, .cursor-glow, .cursor-trail { display: none !important; }
+      * { cursor: auto !important; }
+    }
+    @media (hover: none) and (pointer: coarse) {
+      .cursor-dot, .cursor-ring, .cursor-glow, .cursor-trail { display: none !important; }
+      * { cursor: auto !important; }
+    }
+
+    /* ===== TEXT EFFECTS ===== */
+    .text-glow { text-shadow: 0 0 40px rgba(0, 255, 136, 0.5); }
+    .text-glow-pink { text-shadow: 0 0 40px rgba(255, 0, 110, 0.5); }
+    .text-shimmer { background: linear-gradient(90deg, var(--fg) 0%, var(--accent) 25%, var(--accent-tertiary) 50%, var(--accent) 75%, var(--fg) 100%); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; animation: shimmer 4s linear infinite; }
+    .text-shimmer-secondary { background: linear-gradient(90deg, var(--fg) 0%, var(--accent-tertiary) 25%, var(--accent-secondary) 50%, var(--accent-tertiary) 75%, var(--fg) 100%); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; animation: shimmer 5s linear infinite; animation-delay: -1.5s; }
+    @keyframes shimmer { 0% { background-position: 0% center; } 100% { background-position: 200% center; } }
+
+    /* ===== NAV ===== */
+    .nav-glass { background: rgba(5, 5, 5, 0.7); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+    .nav-link { position: relative; color: var(--muted); font-size: 0.875rem; font-weight: 500; padding: 0.5rem 0; transition: color 0.3s ease; }
+    .nav-link::before { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background: linear-gradient(90deg, var(--accent), var(--accent-tertiary)); transform: scaleX(0); transform-origin: right; transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+    .nav-link:hover { color: var(--fg); }
+    .nav-link:hover::before { transform: scaleX(1); transform-origin: left; }
+
+    .social-icon { display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 14px; background: var(--card); border: 1px solid var(--border); transition: all 0.3s ease; }
+    .social-icon:hover { border-color: var(--accent); background: rgba(0, 255, 136, 0.1); transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0, 255, 136, 0.2); }
+    .social-icon:hover svg { stroke: var(--accent); }
+
+    /* ===== BUTTONS ===== */
+    .btn-primary { position: relative; display: inline-flex; align-items: center; gap: 0.75rem; padding: 1rem 2rem; background: var(--accent); color: var(--bg); font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 0.9375rem; border-radius: 100px; border: none; cursor: none; overflow: hidden; transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease; }
+    .btn-primary::before { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent); transform: translateX(-100%); transition: transform 0.5s ease; }
+    .btn-primary:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 0 40px rgba(0, 255, 136, 0.4); }
+    .btn-primary:hover::before { transform: translateX(100%); }
+
+    .btn-secondary { display: inline-flex; align-items: center; gap: 0.5rem; padding: 1rem 1.75rem; background: transparent; color: var(--fg); font-family: 'Space Grotesk', sans-serif; font-weight: 500; font-size: 0.9375rem; border-radius: 100px; border: 1px solid var(--border); cursor: none; transition: all 0.3s ease; text-decoration: none; }
+    .btn-secondary:hover { border-color: var(--accent); background: rgba(0, 255, 136, 0.05); box-shadow: 0 0 20px rgba(0, 255, 136, 0.1); }
+
+    .btn-pink { position: relative; display: inline-flex; align-items: center; gap: 0.75rem; padding: 1rem 2rem; background: var(--accent-secondary); color: var(--fg); font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 0.9375rem; border-radius: 100px; border: none; cursor: none; overflow: hidden; transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease; text-decoration: none; }
+    .btn-pink:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 0 40px rgba(255, 0, 110, 0.4); }
+
+    /* ===== LABELS ===== */
+    .section-label { display: inline-flex; align-items: center; gap: 0.75rem; padding: 0.5rem 1rem; background: rgba(0, 255, 136, 0.05); border: 1px solid rgba(0, 255, 136, 0.2); border-radius: 100px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); }
+    .section-label::before { content: ''; width: 6px; height: 6px; background: var(--accent); border-radius: 50%; animation: statusPulse 2s ease-in-out infinite; }
+    .section-label-pink { display: inline-flex; align-items: center; gap: 0.75rem; padding: 0.5rem 1rem; background: rgba(255, 0, 110, 0.05); border: 1px solid rgba(255, 0, 110, 0.2); border-radius: 100px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent-secondary); }
+    .section-label-pink::before { content: ''; width: 6px; height: 6px; background: var(--accent-secondary); border-radius: 50%; animation: statusPulse 2s ease-in-out infinite; }
+    .section-label-cyan { display: inline-flex; align-items: center; gap: 0.75rem; padding: 0.5rem 1rem; background: rgba(0, 212, 255, 0.05); border: 1px solid rgba(0, 212, 255, 0.2); border-radius: 100px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent-tertiary); }
+    .section-label-cyan::before { content: ''; width: 6px; height: 6px; background: var(--accent-tertiary); border-radius: 50%; animation: statusPulse 2s ease-in-out infinite; }
+    @keyframes statusPulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.3); } }
+
+    /* ===== CARDS ===== */
+    .workflow-card { position: relative; background: var(--card); border-radius: 20px; overflow: hidden; border: 1px solid var(--border); transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+    .workflow-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255, 0, 110, 0.1) 0%, transparent 50%, rgba(0, 255, 136, 0.1) 100%); opacity: 0; transition: opacity 0.5s ease; z-index: 1; pointer-events: none; }
+    .workflow-card:hover { transform: translateY(-8px) scale(1.01); border-color: rgba(255, 0, 110, 0.3); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 60px -15px rgba(255, 0, 110, 0.3); }
+    .workflow-card:hover::before { opacity: 1; }
+
+    .stat-card { position: relative; background: var(--card); border-radius: 20px; overflow: hidden; border: 1px solid var(--border); transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+    .stat-card:hover { transform: translateY(-5px); border-color: rgba(255, 0, 110, 0.3); box-shadow: 0 15px 40px -10px rgba(0, 0, 0, 0.4), 0 0 40px -10px rgba(255, 0, 110, 0.2); }
+
+    .feature-card { position: relative; background: var(--card); border-radius: 16px; overflow: hidden; border: 1px solid var(--border); transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+    .feature-card:hover { transform: translateY(-5px); border-color: rgba(0, 255, 136, 0.3); box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.4); }
+
+    /* ===== WORKFLOW NODES ===== */
+    .node { display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1.25rem; background: var(--card); border: 1px solid var(--border); border-radius: 14px; transition: all 0.3s ease; position: relative; }
+    .node:hover { border-color: rgba(255, 0, 110, 0.4); box-shadow: 0 0 25px rgba(255, 0, 110, 0.15); transform: translateX(5px); }
+    .node-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .node-connector { width: 2px; height: 24px; background: linear-gradient(to bottom, var(--accent-secondary), transparent); margin-left: 2.75rem; }
+
+    .node-pulse { animation: nodePulse 3s ease-in-out infinite; }
+    @keyframes nodePulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(255, 0, 110, 0); } 50% { box-shadow: 0 0 0 8px rgba(255, 0, 110, 0.1); } }
+
+    /* ===== DATA FLOW LINE ===== */
+    .data-flow-container { position: relative; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; margin: 2rem 0; }
+    .data-flow { position: absolute; top: 0; left: -30%; width: 30%; height: 100%; background: linear-gradient(90deg, transparent, var(--accent-secondary), var(--accent), transparent); border-radius: 2px; animation: dataFlow 2.5s ease-in-out infinite; }
+    @keyframes dataFlow { 0% { left: -30%; } 100% { left: 100%; } }
+
+    /* ===== STEP INDICATOR ===== */
+    .step-number { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1.125rem; flex-shrink: 0; border: 2px solid; transition: all 0.3s ease; }
+
+    /* ===== BACK BUTTON ===== */
+    .back-btn { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--muted); font-size: 0.875rem; font-weight: 500; text-decoration: none; transition: all 0.3s ease; padding: 0.5rem 1rem; border-radius: 100px; border: 1px solid transparent; }
+    .back-btn:hover { color: var(--accent); border-color: rgba(0, 255, 136, 0.2); background: rgba(0, 255, 136, 0.05); }
+    .back-btn svg { transition: transform 0.3s ease; }
+    .back-btn:hover svg { transform: translateX(-4px); }
+
+    /* ===== TAG ===== */
+    .tag-pink { padding: 0.25rem 0.75rem; font-size: 0.75rem; border-radius: 100px; background: rgba(255, 0, 110, 0.1); color: var(--accent-secondary); border: 1px solid rgba(255, 0, 110, 0.2); font-weight: 500; }
+    .tag-green { padding: 0.25rem 0.75rem; font-size: 0.75rem; border-radius: 100px; background: rgba(0, 255, 136, 0.1); color: var(--accent); border: 1px solid rgba(0, 255, 136, 0.2); font-weight: 500; }
+    .tag-cyan { padding: 0.25rem 0.75rem; font-size: 0.75rem; border-radius: 100px; background: rgba(0, 212, 255, 0.1); color: var(--accent-tertiary); border: 1px solid rgba(0, 212, 255, 0.2); font-weight: 500; }
+
+    /* ===== SCROLLBAR ===== */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+    section[id] { scroll-margin-top: 120px; }
+  </style>
+</head>
+<body>
+  <!-- Custom Cursor -->
+  <div class="cursor-dot" id="cursor-dot" aria-hidden="true"></div>
+  <div class="cursor-ring" id="cursor-ring" aria-hidden="true"></div>
+  <div class="cursor-glow" id="cursor-glow" aria-hidden="true"></div>
+  <div class="cursor-trail" id="trail-1" aria-hidden="true"></div>
+  <div class="cursor-trail" id="trail-2" aria-hidden="true"></div>
+  <div class="cursor-trail" id="trail-3" aria-hidden="true"></div>
+  <div class="cursor-trail" id="trail-4" aria-hidden="true"></div>
+  <div class="cursor-trail" id="trail-5" aria-hidden="true"></div>
+
+  <div class="gradient-bg" aria-hidden="true">
+    <div class="gradient-orb orb-1"></div>
+    <div class="gradient-orb orb-2"></div>
+    <div class="gradient-orb orb-3"></div>
+  </div>
+  <div class="grid-pattern" aria-hidden="true"></div>
+
+  <!-- Navigation -->
+  <nav class="fixed top-0 left-0 right-0 z-50 nav-glass">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <a href="index.html" class="font-display text-2xl font-bold tracking-tight magnetic-target">
+        <span class="text-glow" style="color: var(--accent);">T</span><span class="text-[var(--muted)]">.</span>
+      </a>
+      <div class="hidden md:flex items-center gap-10">
+        <a href="index.html#services" class="nav-link magnetic-target">Services</a>
+        <a href="index.html#results" class="nav-link magnetic-target">Results</a>
+        <a href="index.html#case-studies" class="nav-link magnetic-target">Case Studies</a>
+        <a href="index.html#certification" class="nav-link magnetic-target">Certification</a>
+        <a href="index.html#about" class="nav-link magnetic-target">About</a>
+        <a href="index.html#contact" class="nav-link magnetic-target">Contact</a>
+      </div>
+      <div class="flex items-center gap-4">
+        <a href="https://www.linkedin.com/in/tony-adijah-965903131/" target="_blank" rel="noopener noreferrer" class="social-icon magnetic-target" aria-label="LinkedIn Profile">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+            <rect x="2" y="9" width="4" height="12"/>
+            <circle cx="4" cy="4" r="2"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <header class="relative z-10 pt-32 pb-20">
+    <div class="max-w-7xl mx-auto px-6">
+      <!-- Back Button -->
+      <a href="index.html#case-studies" class="back-btn reveal magnetic-target">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Back to Case Studies
+      </a>
+
+      <div class="mt-10 max-w-4xl">
+        <div class="flex flex-wrap items-center gap-3 mb-6 reveal reveal-delay-1">
+          <span class="section-label-pink">n8n Workflow</span>
+          <span class="tag-green">Automation</span>
+          <span class="tag-cyan">Job Search</span>
+        </div>
+
+        <h1 class="font-display text-5xl md:text-7xl lg:text-8xl font-bold leading-[0.95] tracking-tight reveal reveal-delay-2">
+          <span class="text-shimmer-secondary">Job Scraper</span> —<br>
+          <span class="text-[var(--muted)]">RSS to Telegram</span><br>
+          <span class="text-shimmer">Alerts</span>
+        </h1>
+
+        <p class="text-xl md:text-2xl text-[var(--muted)] max-w-2xl mt-8 leading-relaxed reveal reveal-delay-3">
+          Automated job board monitoring, <span style="color: var(--accent);">smart filtering</span>, and <span style="color: var(--accent-secondary);">deduplication</span> — sending instant Telegram alerts for matching roles without manually refreshing pages.
+        </p>
+
+        <div class="flex flex-wrap gap-4 mt-10 reveal reveal-delay-4">
+          <a href="index.html#contact" class="btn-pink magnetic-target">
+            Get This Template
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+          <a href="#workflow" class="btn-secondary magnetic-target">
+            See the Workflow
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Data Flow Animation -->
+      <div class="data-flow-container reveal reveal-delay-4">
+        <div class="data-flow"></div>
+      </div>
+
+      <!-- Quick Stats -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 reveal reveal-delay-4">
+        <div class="stat-card p-6 text-center">
+          <div class="font-display text-3xl md:text-4xl font-bold text-glow-pink" style="color: var(--accent-secondary);">6h</div>
+          <div class="text-sm text-[var(--muted)] mt-1">Schedule</div>
+        </div>
+        <div class="stat-card p-6 text-center">
+          <div class="font-display text-3xl md:text-4xl font-bold text-glow" style="color: var(--accent);">0</div>
+          <div class="text-sm text-[var(--muted)] mt-1">Duplicates</div>
+        </div>
+        <div class="stat-card p-6 text-center">
+          <div class="font-display text-3xl md:text-4xl font-bold" style="color: var(--accent-tertiary);">Instant</div>
+          <div class="text-sm text-[var(--muted)] mt-1">Alerts</div>
+        </div>
+        <div class="stat-card p-6 text-center">
+          <div class="font-display text-3xl md:text-4xl font-bold" style="color: var(--fg);">Auto</div>
+          <div class="text-sm text-[var(--muted)] mt-1">Filtering</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Who It's For -->
+  <section class="relative z-10 py-24 bg-[var(--bg-elevated)]">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="grid md:grid-cols-2 gap-12">
+        <!-- Who It's For -->
+        <div class="space-y-6 reveal">
+          <span class="section-label-cyan">Target Audience</span>
+          <h2 class="font-display text-3xl md:text-4xl font-bold mt-4">
+            Who Is This <span class="text-shimmer">For?</span>
+          </h2>
+          <div class="space-y-4 text-[var(--muted)]">
+            <div class="flex items-start gap-3">
+              <div class="w-6 h-6 rounded-full bg-[rgba(0,212,255,0.15)] flex items-center justify-center flex-shrink-0 mt-0.5">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent-tertiary)" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <p><strong class="text-[var(--fg)]">Job Seekers</strong> actively monitoring multiple boards who need speed.</p>
+            </div>
+            <div class="flex items-start gap-3">
+              <div class="w-6 h-6 rounded-full bg-[rgba(0,212,255,0.15)] flex items-center justify-center flex-shrink-0 mt-0.5">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent-tertiary)" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <p><strong class="text-[var(--fg)]">Recruiters</strong> tracking specific talent pools or competitor listings.</p>
+            </div>
+            <div class="flex items-start gap-3">
+              <div class="w-6 h-6 rounded-full bg-[rgba(0,212,255,0.15)] flex items-center justify-center flex-shrink-0 mt-0.5">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent-tertiary)" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <p><strong class="text-[var(--fg)]">Freelancers</strong> looking for contract gigs across different platforms.</p>
+            </div>
+            <div class="flex items-start gap-3">
+              <div class="w-6 h-6 rounded-full bg-[rgba(0,212,255,0.15)] flex items-center justify-center flex-shrink-0 mt-0.5">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent-tertiary)" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <p><strong class="text-[var(--fg)]">Career Changers</strong> entering a new industry who need targeted alerts.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Requirements -->
+        <div class="space-y-6 reveal reveal-delay-1">
+          <span class="section-label-pink">Requirements</span>
+          <h2 class="font-display text-3xl md:text-4xl font-bold mt-4">
+            What You'll <span class="text-[var(--muted)]">Need</span>
+          </h2>
+          <div class="space-y-4 text-[var(--muted)]">
+            <div class="flex items-start gap-3">
+              <div class="w-6 h-6 rounded-full bg-[rgba(255,0,110,0.15)] flex items-center justify-center flex-shrink-0 mt-0.5">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent-secondary)" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+              </div>
+              <p><strong class="text-[var(--fg)]">n8n Instance</strong> (Cloud or Self-hosted).</p>
+            </div>
+            <div class="flex items-start gap-3">
+              <div class="w-6 h-6 rounded-full bg-[rgba(255,0,110,0.15)] flex items-center justify-center flex-shrink-0 mt-0.5">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent-secondary)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+              </div>
+              <p><strong class="text-[var(--fg)]">Google Sheets</strong> account with OAuth credentials.</p>
+            </div>
+            <div class="flex items-start gap-3">
+              <div class="w-6 h-6 rounded-full bg-[rgba(255,0,110,0.15)] flex items-center justify-center flex-shrink-0 mt-0.5">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent-secondary)" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              </div>
+              <p><strong class="text-[var(--fg)]">Telegram Bot</strong> token and Chat ID via @BotFather.</p>
+            </div>
+            <div class="flex items-start gap-3">
+              <div class="w-6 h-6 rounded-full bg-[rgba(255,0,110,0.15)] flex items-center justify-center flex-shrink-0 mt-0.5">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent-secondary)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              </div>
+              <p><strong class="text-[var(--fg)]">Job Board</strong> with RSS Feed or Public API.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Workflow Breakdown -->
+  <section id="workflow" class="relative z-10 py-32">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="text-center mb-12">
+        <span class="section-label-pink reveal">How It Works</span>
+        <h2 class="font-display text-5xl md:text-6xl font-bold mt-6 reveal reveal-delay-1">
+          Workflow <span class="text-shimmer-secondary">Breakdown</span>
+        </h2>
+        <p class="text-[var(--muted)] max-w-2xl mx-auto mt-4 reveal reveal-delay-2">
+          Automate your job search from RSS feed to Telegram notification.
+        </p>
+      </div>
+
+      <!-- Workflow Image -->
+      <div class="mt-12 mb-20 reveal reveal-delay-2 max-w-5xl mx-auto">
+        <div class="relative rounded-2xl border border-[var(--border)] overflow-hidden bg-[var(--card)] shadow-2xl">
+          <img src="Scrape job posts from RSS feeds and get instant Telegram alerts with deduplication.png" alt="Workflow diagram for Job Scraper" class="w-full h-auto object-cover">
+          <div class="absolute inset-0 bg-gradient-to-t from-[var(--bg)] via-transparent to-transparent opacity-20 pointer-events-none"></div>
+        </div>
+      </div>
+
+      <div class="max-w-3xl mx-auto">
+        <!-- Step 1 -->
+        <div class="flex gap-6 mb-4 reveal">
+          <div class="flex flex-col items-center">
+            <div class="step-number" style="border-color: var(--accent-secondary); color: var(--accent-secondary);">1</div>
+            <div class="flex-1 w-0.5 bg-gradient-to-b from-[var(--accent-secondary)] to-transparent mt-3"></div>
+          </div>
+          <div class="pb-12">
+            <h3 class="font-display text-2xl font-bold mb-2">Schedule & Fetch</h3>
+            <p class="text-[var(--muted)] mb-4"><strong class="text-[var(--fg)]">Runs every 6 hours.</strong> The Schedule Trigger initiates the workflow. An HTTP Request node fetches raw job data from your target RSS feed or Job Board API (e.g., RemoteOK, Arbeitnow).</p>
+            <div class="flex flex-wrap gap-2">
+              <span class="tag-pink">Schedule</span>
+              <span class="tag-green">HTTP Request</span>
+              <span class="tag-cyan">RSS/API</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 1 Nodes -->
+        <div class="max-w-md ml-16 mb-8 reveal reveal-delay-1">
+          <div class="node node-pulse">
+            <div class="node-icon bg-gradient-to-br from-[var(--accent-secondary)] to-[var(--accent)]">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div>
+              <div class="font-display text-sm font-bold">Schedule Trigger</div>
+              <div class="text-xs text-[var(--muted)]">Every 6 Hours</div>
+            </div>
+          </div>
+          <div class="node-connector"></div>
+          <div class="node">
+            <div class="node-icon bg-gradient-to-br from-[var(--accent)] to-[var(--accent-tertiary)]">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            </div>
+            <div>
+              <div class="font-display text-sm font-bold">Fetch Data</div>
+              <div class="text-xs text-[var(--muted)]">RSS Feed / API Endpoint</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="flex gap-6 mb-4 reveal reveal-delay-2">
+          <div class="flex flex-col items-center">
+            <div class="step-number" style="border-color: var(--accent); color: var(--accent);">2</div>
+            <div class="flex-1 w-0.5 bg-gradient-to-b from-[var(--accent)] to-transparent mt-3"></div>
+          </div>
+          <div class="pb-12">
+            <h3 class="font-display text-2xl font-bold mb-2">Parse & Filter</h3>
+            <p class="text-[var(--muted)] mb-4">Raw data is normalized into clean objects (Title, Company, URL, Salary). A Keyword Filter then matches jobs against your configured target roles and locations, excluding unwanted terms.</p>
+            <div class="flex flex-wrap gap-2">
+              <span class="tag-green">Normalize</span>
+              <span class="tag-pink">Filter Logic</span>
+              <span class="tag-cyan">Match Roles</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2 Visualization -->
+        <div class="max-w-md ml-16 mb-8 reveal reveal-delay-3">
+          <div class="node">
+            <div class="node-icon bg-gradient-to-br from-[var(--accent-tertiary)] to-[var(--accent-secondary)]">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+            </div>
+            <div class="flex-1">
+              <div class="font-display text-sm font-bold">Parse & Extract</div>
+              <div class="text-xs text-[var(--muted)]">Title, Company, Salary, Tags</div>
+            </div>
+          </div>
+          <div class="node-connector"></div>
+          <div class="node">
+             <div class="node-icon bg-gradient-to-br from-[var(--accent)] to-[var(--accent-secondary)]">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/></svg>
+            </div>
+            <div class="flex-1">
+              <div class="font-display text-sm font-bold">Keyword Filter</div>
+              <div class="text-xs text-[var(--muted)]">Target Roles vs Exclude Terms</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="flex gap-6 reveal reveal-delay-4">
+          <div class="flex flex-col items-center">
+            <div class="step-number" style="border-color: var(--accent-tertiary); color: var(--accent-tertiary);">3</div>
+          </div>
+          <div>
+            <h3 class="font-display text-2xl font-bold mb-2">Dedupe & Alert</h3>
+            <p class="text-[var(--muted)] mb-4">Checks against a Google Sheet of previously seen jobs. If new, it logs the job for history and sends a formatted Telegram alert with all details and a direct apply link.</p>
+            <div class="flex flex-wrap gap-2">
+              <span class="tag-cyan">Google Sheets</span>
+              <span class="tag-pink">Deduplication</span>
+              <span class="tag-green">Telegram</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Final Nodes -->
+        <div class="max-w-md ml-16 mt-8 reveal reveal-delay-5">
+          <div class="node node-pulse">
+            <div class="node-icon bg-gradient-to-br from-[var(--accent)] to-[var(--accent-tertiary)]">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <div>
+              <div class="font-display text-sm font-bold">Telegram Alert</div>
+              <div class="text-xs text-[var(--muted)]">Instant Notification</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tech Stack Used -->
+  <section class="relative z-10 py-24 bg-[var(--bg-elevated)]">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="text-center mb-16">
+        <span class="section-label-cyan reveal">Stack</span>
+        <h2 class="font-display text-4xl md:text-5xl font-bold mt-6 reveal reveal-delay-1">
+          Tools <span class="text-[var(--muted)]">Powering This</span>
+        </h2>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
+        <div class="feature-card p-6 text-center reveal">
+          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--accent-secondary)] to-[var(--accent)] flex items-center justify-center mx-auto mb-3">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          </div>
+          <div class="font-display font-bold text-sm">n8n</div>
+          <div class="text-xs text-[var(--muted)] mt-1">Orchestration</div>
+        </div>
+        <div class="feature-card p-6 text-center reveal reveal-delay-1">
+          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--accent)] to-[var(--accent-tertiary)] flex items-center justify-center mx-auto mb-3">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+          </div>
+          <div class="font-display font-bold text-sm">Google Sheets</div>
+          <div class="text-xs text-[var(--muted)] mt-1">Storage</div>
+        </div>
+        <div class="feature-card p-6 text-center reveal reveal-delay-2">
+          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--accent-tertiary)] to-[var(--accent-secondary)] flex items-center justify-center mx-auto mb-3">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <div class="font-display font-bold text-sm">Telegram</div>
+          <div class="text-xs text-[var(--muted)] mt-1">Alerts</div>
+        </div>
+        <div class="feature-card p-6 text-center reveal reveal-delay-3">
+          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--accent)] to-[var(--accent-secondary)] flex items-center justify-center mx-auto mb-3">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg>
+          </div>
+          <div class="font-display font-bold text-sm">RSS / API</div>
+          <div class="text-xs text-[var(--muted)] mt-1">Source</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Setup Steps -->
+  <section class="relative z-10 py-32">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="text-center mb-16">
+        <span class="section-label reveal">Implementation</span>
+        <h2 class="font-display text-5xl md:text-6xl font-bold mt-6 reveal reveal-delay-1">
+          Setup <span class="text-shimmer-secondary">Steps</span>
+        </h2>
+      </div>
+      <div class="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+        <div class="workflow-card reveal">
+          <div class="relative z-10 p-8">
+            <div class="w-10 h-10 rounded-full bg-[rgba(0,255,136,0.15)] flex items-center justify-center mb-4 text-[var(--accent)] font-display font-bold">1</div>
+            <h3 class="font-display text-xl font-bold mb-3">Configure Schedule</h3>
+            <p class="text-[var(--muted)] text-sm">Adjust the Schedule Trigger node. Default is every 6 hours, but set to 1 hour for active searches.</p>
+          </div>
+        </div>
+        <div class="workflow-card reveal reveal-delay-1">
+          <div class="relative z-10 p-8">
+            <div class="w-10 h-10 rounded-full bg-[rgba(255,0,110,0.15)] flex items-center justify-center mb-4 text-[var(--accent-secondary)] font-display font-bold">2</div>
+            <h3 class="font-display text-xl font-bold mb-3">Set Job Source</h3>
+            <p class="text-[var(--muted)] text-sm">Replace the URL in the HTTP Request node with your target RSS or API (e.g., RemoteOK, Arbeitnow, LinkedIn).</p>
+          </div>
+        </div>
+        <div class="workflow-card reveal reveal-delay-2">
+          <div class="relative z-10 p-8">
+            <div class="w-10 h-10 rounded-full bg-[rgba(0,212,255,0.15)] flex items-center justify-center mb-4 text-[var(--accent-tertiary)] font-display font-bold">3</div>
+            <h3 class="font-display text-xl font-bold mb-3">Define Keywords</h3>
+            <p class="text-[var(--muted)] text-sm">Edit the Keyword Filter node arrays: <code class="text-xs bg-[var(--bg)] px-1.5 py-0.5 rounded">targetRoles</code>, <code class="text-xs bg-[var(--bg)] px-1.5 py-0.5 rounded">targetLocations</code>, and <code class="text-xs bg-[var(--bg)] px-1.5 py-0.5 rounded">excludeTerms</code>.</p>
+          </div>
+        </div>
+        <div class="workflow-card reveal reveal-delay-3">
+          <div class="relative z-10 p-8">
+            <div class="w-10 h-10 rounded-full bg-[rgba(0,255,136,0.15)] flex items-center justify-center mb-4 text-[var(--accent)] font-display font-bold">4</div>
+            <h3 class="font-display text-xl font-bold mb-3">Connect Sheets</h3>
+            <p class="text-[var(--muted)] text-sm">Create a sheet with columns: Title, Company, Location, URL, Salary, etc. Connect Google Sheets OAuth in both nodes.</p>
+          </div>
+        </div>
+        <div class="workflow-card reveal reveal-delay-4">
+          <div class="relative z-10 p-8">
+            <div class="w-10 h-10 rounded-full bg-[rgba(255,0,110,0.15)] flex items-center justify-center mb-4 text-[var(--accent-secondary)] font-display font-bold">5</div>
+            <h3 class="font-display text-xl font-bold mb-3">Telegram Setup</h3>
+            <p class="text-[var(--muted)] text-sm">Create a bot via @BotFather, get your token and Chat ID. Connect the credential and set the Chat ID in the alert node.</p>
+          </div>
+        </div>
+        <div class="workflow-card reveal reveal-delay-5">
+          <div class="relative z-10 p-8">
+            <div class="w-10 h-10 rounded-full bg-[rgba(0,212,255,0.15)] flex items-center justify-center mb-4 text-[var(--accent-tertiary)] font-display font-bold">6</div>
+            <h3 class="font-display text-xl font-bold mb-3">Test Run</h3>
+            <p class="text-[var(--muted)] text-sm">Execute the workflow manually once to verify data flows correctly through parsing, filtering, and alerting.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="relative z-10 py-32 bg-[var(--bg-elevated)]">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="max-w-3xl mx-auto text-center">
+        <span class="section-label-pink reveal">Ready?</span>
+        <h2 class="font-display text-5xl md:text-7xl font-bold mt-8 leading-tight reveal reveal-delay-1">
+          Get This<br><span class="text-shimmer-secondary">Workflow Template</span>
+        </h2>
+        <p class="text-xl text-[var(--muted)] mt-6 max-w-xl mx-auto reveal reveal-delay-2">
+          Stop manually refreshing job boards. Let automation find the opportunities for you.
+        </p>
+        <div class="flex flex-wrap justify-center gap-4 mt-10 reveal reveal-delay-3">
+          <a href="index.html#contact" class="btn-pink magnetic-target">
+            Get the Template
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </a>
+          <a href="index.html#case-studies" class="btn-secondary magnetic-target">
+            View More Projects
+          </a>
+        </div>
+
+        <!-- Data Flow -->
+        <div class="data-flow-container mt-16 reveal reveal-delay-4">
+          <div class="data-flow"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="relative z-10 py-8 border-t border-[var(--border)]">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-2 text-[var(--muted)] text-sm">
+          <span>Designed & Built by</span>
+          <span class="font-display font-bold text-[var(--fg)]">Tony Adijah</span>
+        </div>
+        <div class="flex items-center gap-4">
+          <a href="https://www.linkedin.com/in/tony-adijah-965903131/" target="_blank" rel="noopener noreferrer" class="text-[var(--muted)] hover:text-[var(--accent)] transition-colors magnetic-target" aria-label="LinkedIn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+              <rect x="2" y="9" width="4" height="12"/>
+              <circle cx="4" cy="4" r="2"/>
+            </svg>
+          </a>
+          <span class="text-sm text-[var(--muted)]">&copy; 2026 All rights reserved.</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+      // ===== CUSTOM CURSOR =====
+      var dot = document.getElementById('cursor-dot');
+      var ring = document.getElementById('cursor-ring');
+      var glow = document.getElementById('cursor-glow');
+      var trails = [];
+      for (var t = 1; t <= 5; t++) { trails.push(document.getElementById('trail-' + t)); }
+
+      var isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+      var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var cursorEnabled = !isTouchDevice && !prefersReducedMotion;
+
+      if (cursorEnabled && dot && ring && glow) {
+        var mouseX = 0, mouseY = 0, dotX = 0, dotY = 0, ringX = 0, ringY = 0, glowX = 0, glowY = 0;
+        var trailPositions = [], isMoving = false, moveTimeout;
+        for (var i = 0; i < trails.length; i++) { trailPositions.push({ x: 0, y: 0 }); }
+
+        document.addEventListener('mousemove', function(e) {
+          mouseX = e.clientX; mouseY = e.clientY; isMoving = true;
+          clearTimeout(moveTimeout); moveTimeout = setTimeout(function() { isMoving = false; }, 100);
+        });
+
+        document.addEventListener('click', function(e) {
+          for (var i = 0; i < 8; i++) {
+            var p = document.createElement('div');
+            p.style.cssText = 'position:fixed;width:4px;height:4px;border-radius:50%;pointer-events:none;z-index:99999;';
+            var c = ['#00ff88','#ff006e','#00d4ff']; p.style.background = c[Math.floor(Math.random()*c.length)];
+            p.style.left = e.clientX+'px'; p.style.top = e.clientY+'px';
+            p.style.boxShadow = '0 0 6px '+p.style.background; document.body.appendChild(p);
+            var a = (Math.PI*2/8)*i+(Math.random()*0.5), v = 60+Math.random()*40;
+            var tx = e.clientX+Math.cos(a)*v, ty = e.clientY+Math.sin(a)*v;
+            (function(el,sx,sy,ex,ey){ var st=Date.now(); function tk(){ var el2=Date.now()-st,pr=Math.min(el2/600,1),ea=1-Math.pow(1-pr,3);
+            el.style.left=sx+(ex-sx)*ea+'px';el.style.top=sy+(ey-sy)*ea+'px';el.style.opacity=1-pr;el.style.transform='scale('+(1-pr*0.5)+')';
+            if(pr<1){requestAnimationFrame(tk)}else{el.remove()}}requestAnimationFrame(tk)})(p,e.clientX,e.clientY,tx,ty);
+          }
+        });
+
+        function animate() {
+          dotX+=(mouseX-dotX)*0.35; dotY+=(mouseY-dotY)*0.35; dot.style.left=dotX+'px'; dot.style.top=dotY+'px';
+          ringX+=(mouseX-ringX)*0.15; ringY+=(mouseY-ringY)*0.15; ring.style.left=ringX+'px'; ring.style.top=ringY+'px';
+          glowX+=(mouseX-glowX)*0.08; glowY+=(mouseY-glowY)*0.08; glow.style.left=glowX+'px'; glow.style.top=glowY+'px';
+          for(var i=0;i<trails.length;i++){var tg=i===0?{x:dotX,y:dotY}:trailPositions[i-1];var sp=0.2-(i*0.03);
+          trailPositions[i].x+=(tg.x-trailPositions[i].x)*sp;trailPositions[i].y+=(tg.y-trailPositions[i].y)*sp;
+          trails[i].style.left=trailPositions[i].x+'px';trails[i].style.top=trailPositions[i].y+'px';
+          if(isMoving){var to=0.4-(i*0.07),ts=5-i;trails[i].style.opacity=to;trails[i].style.width=ts+'px';trails[i].style.height=ts+'px';
+          trails[i].style.background=i%2===0?'rgba(0,255,136,0.6)':'rgba(0,212,255,0.6)';trails[i].style.boxShadow='0 0 '+(ts+2)+'px '+trails[i].style.background;}
+          else{trails[i].style.opacity=0;}}
+          var dx=mouseX-ringX,dy=mouseY-ringY,spd=Math.sqrt(dx*dx+dy*dy),sk=Math.min(spd*0.3,15),ag=Math.atan2(dy,dx)*(180/Math.PI);
+          ring.style.transform='translate(-50%,-50%) rotate('+ag+'deg) scaleX('+(1+sk*0.01)+')';
+          requestAnimationFrame(animate);
+        }
+        animate();
+
+        document.querySelectorAll('a,button,.workflow-card,.stat-card,.feature-card,.social-icon,.node,.magnetic-target,.btn-primary,.btn-secondary,.btn-pink,.back-btn').forEach(function(el){
+          el.addEventListener('mouseenter',function(){dot.classList.add('cursor-hover');ring.classList.add('cursor-hover');});
+          el.addEventListener('mouseleave',function(){dot.classList.remove('cursor-hover');ring.classList.remove('cursor-hover');});
+        });
+
+        document.querySelectorAll('.magnetic-target').forEach(function(el){
+          el.addEventListener('mousemove',function(e){var r=el.getBoundingClientRect();var cx=r.left+r.width/2,cy=r.top+r.height/2;
+          el.style.transform='translate('+((e.clientX-cx)*0.2)+'px,'+((e.clientY-cy)*0.2)+'px)';});
+          el.addEventListener('mouseleave',function(){el.style.transform='';});
+        });
+
+        document.addEventListener('mouseleave',function(){dot.classList.add('cursor-hidden');ring.classList.add('cursor-hidden');glow.style.opacity='0';});
+        document.addEventListener('mouseenter',function(){dot.classList.remove('cursor-hidden');ring.classList.remove('cursor-hidden');glow.style.opacity='1';});
+      } else {
+        if(dot)dot.style.display='none';if(ring)ring.style.display='none';if(glow)glow.style.display='none';
+        trails.forEach(function(t){if(t)t.style.display='none';});
+        document.querySelectorAll('*').forEach(function(el){el.style.cursor='auto';});
+      }
+
+      // ===== SCROLL REVEAL =====
+      var reveals = document.querySelectorAll('.reveal');
+      var obs = new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);}});},{rootMargin:'0px 0px -80px 0px',threshold:0.1});
+      reveals.forEach(function(el){obs.observe(el);});
+
+      // ===== SMOOTH SCROLL =====
+      document.querySelectorAll('a[href^="#"]').forEach(function(a){a.addEventListener('click',function(e){
+        var id=this.getAttribute('href');if(id==='#')return;var t=document.querySelector(id);
+        if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'});}});
+      });
+    });
+  </script>
+</body>
+</html>
