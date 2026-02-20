@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>AI SDR — Tony Adijah</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -21,154 +21,513 @@
       --border: #222222;
     }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
-    html { scroll-behavior: smooth; }
-    body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--fg); line-height: 1.6; overflow-x: hidden; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+    body {
+      font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--fg);
+      line-height: 1.6; overflow-x: hidden;
+      -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+    }
+    body.menu-open { overflow: hidden; position: fixed; width: 100%; height: 100%; }
     .font-display { font-family: 'Space Grotesk', sans-serif; }
 
-    /* ===== CUSTOM CURSOR ===== */
+    /* ===== CURSOR (Desktop Only) ===== */
+    @media (hover: hover) and (pointer: fine) { * { cursor: none; } }
+
     .cursor-dot {
       position: fixed; width: 8px; height: 8px; background: var(--accent); border-radius: 50%;
-      pointer-events: none; z-index: 99999; transform: translate(-50%, -50%);
+      pointer-events: none; z-index: 99999;
+      -webkit-transform: translate(-50%, -50%); transform: translate(-50%, -50%);
+      -webkit-transition: width 0.3s ease, height 0.3s ease, background 0.3s ease, opacity 0.3s ease;
       transition: width 0.3s ease, height 0.3s ease, background 0.3s ease, opacity 0.3s ease;
       box-shadow: 0 0 10px var(--accent), 0 0 20px rgba(0, 255, 136, 0.3);
+      display: none; will-change: transform, left, top;
     }
     .cursor-dot.cursor-hover { width: 16px; height: 16px; background: var(--accent-secondary); box-shadow: 0 0 15px var(--accent-secondary), 0 0 30px rgba(255, 0, 110, 0.3); }
     .cursor-dot.cursor-hidden { opacity: 0; width: 0; height: 0; }
 
     .cursor-ring {
       position: fixed; width: 40px; height: 40px; border: 2px solid rgba(0, 255, 136, 0.5); border-radius: 50%;
-      pointer-events: none; z-index: 99998; transform: translate(-50%, -50%);
+      pointer-events: none; z-index: 99998;
+      -webkit-transform: translate(-50%, -50%); transform: translate(-50%, -50%);
+      -webkit-transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1), height 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, opacity 0.3s ease, background 0.3s ease;
       transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1), height 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, opacity 0.3s ease, background 0.3s ease;
+      display: none; will-change: transform, left, top;
     }
     .cursor-ring.cursor-hover { width: 60px; height: 60px; border-color: rgba(255, 0, 110, 0.4); background: rgba(255, 0, 110, 0.05); }
     .cursor-ring.cursor-hidden { opacity: 0; width: 0; height: 0; }
 
-    .cursor-trail { position: fixed; width: 6px; height: 6px; border-radius: 50%; pointer-events: none; z-index: 99997; transform: translate(-50%, -50%); opacity: 0; }
+    .cursor-trail {
+      position: fixed; width: 6px; height: 6px; border-radius: 50%;
+      pointer-events: none; z-index: 99997;
+      -webkit-transform: translate(-50%, -50%); transform: translate(-50%, -50%);
+      opacity: 0; display: none; will-change: transform, left, top, opacity;
+    }
 
     .cursor-glow {
       position: fixed; width: 400px; height: 400px; border-radius: 50%;
       background: radial-gradient(circle, rgba(0, 255, 136, 0.12) 0%, transparent 70%);
-      pointer-events: none; z-index: 1; transform: translate(-50%, -50%); transition: opacity 0.3s ease; mix-blend-mode: screen;
+      pointer-events: none; z-index: 1;
+      -webkit-transform: translate(-50%, -50%); transform: translate(-50%, -50%);
+      -webkit-transition: opacity 0.3s ease; transition: opacity 0.3s ease;
+      display: none; will-change: transform, left, top;
     }
 
-    .magnetic-target { transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+    @media (hover: hover) and (pointer: fine) {
+      .cursor-dot, .cursor-ring, .cursor-glow, .cursor-trail { display: block; }
+    }
+
+    .magnetic-target {
+      -webkit-transition: -webkit-transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* ===== TOUCH RIPPLE ===== */
+    .touch-ripple-container {
+      position: relative; overflow: hidden;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .touch-ripple {
+      position: absolute; border-radius: 50%;
+      background: rgba(255, 0, 110, 0.2);
+      pointer-events: none;
+      -webkit-transform: scale(0); transform: scale(0);
+      -webkit-animation: rippleExpand 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      animation: rippleExpand 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      z-index: 100;
+    }
+    .touch-ripple.ripple-green { background: rgba(0, 255, 136, 0.2); }
+    .touch-ripple.ripple-cyan { background: rgba(0, 212, 255, 0.2); }
+    .touch-ripple.ripple-white { background: rgba(255, 255, 255, 0.2); }
+
+    @-webkit-keyframes rippleExpand {
+      0% { -webkit-transform: scale(0); opacity: 0.5; }
+      100% { -webkit-transform: scale(4); opacity: 0; }
+    }
+    @keyframes rippleExpand {
+      0% { transform: scale(0); opacity: 0.5; }
+      100% { transform: scale(4); opacity: 0; }
+    }
+
+    .touch-glow {
+      position: fixed; width: 100px; height: 100px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 0, 110, 0.3) 0%, transparent 70%);
+      pointer-events: none; z-index: 99990;
+      -webkit-transform: translate(-50%, -50%) scale(0); transform: translate(-50%, -50%) scale(0);
+      opacity: 0;
+      -webkit-transition: opacity 0.3s ease, -webkit-transform 0.3s ease;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    .touch-glow.active {
+      -webkit-transform: translate(-50%, -50%) scale(1); transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+    }
+
+    /* Touch active states */
+    @media (hover: none) and (pointer: coarse) {
+      .workflow-card:active, .stat-card:active, .feature-card:active, .node:active {
+        -webkit-transform: scale(0.97); transform: scale(0.97);
+        border-color: rgba(255, 0, 110, 0.3);
+        -webkit-transition: -webkit-transform 0.1s ease; transition: transform 0.1s ease;
+      }
+      .btn-pink:active, .btn-primary:active {
+        -webkit-transform: scale(0.95); transform: scale(0.95);
+        box-shadow: 0 0 30px rgba(255, 0, 110, 0.5);
+      }
+      .btn-secondary:active {
+        -webkit-transform: scale(0.95); transform: scale(0.95);
+        border-color: var(--accent); background: rgba(0, 255, 136, 0.08);
+      }
+      .social-icon:active {
+        -webkit-transform: scale(0.9); transform: scale(0.9);
+        border-color: var(--accent); background: rgba(0, 255, 136, 0.15);
+      }
+    }
 
     /* ===== BACKGROUND ===== */
     .gradient-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: hidden; }
-    .gradient-orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.5; animation: orbFloat 15s ease-in-out infinite; }
-    .orb-1 { width: 600px; height: 600px; background: var(--accent-secondary); top: -200px; right: -200px; animation-delay: 0s; }
-    .orb-2 { width: 500px; height: 500px; background: var(--accent); bottom: -150px; left: -150px; animation-delay: -5s; }
-    .orb-3 { width: 400px; height: 400px; background: var(--accent-tertiary); top: 50%; left: 50%; transform: translate(-50%, -50%); animation-delay: -10s; }
-    @keyframes orbFloat { 0%, 100% { transform: translate(0, 0) scale(1); } 25% { transform: translate(50px, -50px) scale(1.1); } 50% { transform: translate(-30px, 30px) scale(0.9); } 75% { transform: translate(40px, 20px) scale(1.05); } }
+    .gradient-orb {
+      position: absolute; border-radius: 50%;
+      -webkit-filter: blur(80px); filter: blur(80px);
+      opacity: 0.5;
+      -webkit-animation: orbFloat 15s ease-in-out infinite;
+      animation: orbFloat 15s ease-in-out infinite;
+      will-change: transform;
+    }
+    .orb-1 { width: 600px; height: 600px; background: var(--accent-secondary); top: -200px; right: -200px; }
+    .orb-2 { width: 500px; height: 500px; background: var(--accent); bottom: -150px; left: -150px; -webkit-animation-delay: -5s; animation-delay: -5s; }
+    .orb-3 { width: 400px; height: 400px; background: var(--accent-tertiary); top: 50%; left: 50%; -webkit-transform: translate(-50%, -50%); transform: translate(-50%, -50%); -webkit-animation-delay: -10s; animation-delay: -10s; }
 
-    .grid-pattern { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px); background-size: 60px 60px; mask-image: radial-gradient(ellipse at center, black 0%, transparent 70%); }
+    @media (max-width: 480px) {
+      .orb-1 { width: 250px; height: 250px; top: -80px; right: -80px; }
+      .orb-2 { width: 200px; height: 200px; bottom: -60px; left: -60px; }
+      .orb-3 { width: 160px; height: 160px; }
+      .gradient-orb { -webkit-filter: blur(50px); filter: blur(50px); opacity: 0.3; }
+    }
+    @media (max-width: 320px) {
+      .orb-1 { width: 180px; height: 180px; top: -60px; right: -60px; }
+      .orb-2 { width: 150px; height: 150px; bottom: -50px; left: -50px; }
+      .orb-3 { width: 120px; height: 120px; }
+      .gradient-orb { -webkit-filter: blur(40px); filter: blur(40px); opacity: 0.25; }
+    }
+
+    @-webkit-keyframes orbFloat {
+      0%, 100% { -webkit-transform: translate(0, 0) scale(1); }
+      25% { -webkit-transform: translate(50px, -50px) scale(1.1); }
+      50% { -webkit-transform: translate(-30px, 30px) scale(0.9); }
+      75% { -webkit-transform: translate(40px, 20px) scale(1.05); }
+    }
+    @keyframes orbFloat {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      25% { transform: translate(50px, -50px) scale(1.1); }
+      50% { transform: translate(-30px, 30px) scale(0.9); }
+      75% { transform: translate(40px, 20px) scale(1.05); }
+    }
+
+    .grid-pattern {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none; z-index: 1;
+      background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 60px 60px;
+      -webkit-mask-image: radial-gradient(ellipse at center, black 0%, transparent 70%);
+      mask-image: radial-gradient(ellipse at center, black 0%, transparent 70%);
+    }
+    @media (max-width: 768px) { .grid-pattern { background-size: 40px 40px; } }
+    @media (max-width: 320px) { .grid-pattern { background-size: 30px 30px; opacity: 0.5; } }
 
     /* ===== ANIMATIONS ===== */
-    .reveal { opacity: 0; transform: translateY(60px); transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1); }
-    .reveal.visible { opacity: 1; transform: translateY(0); }
-    .reveal-delay-1 { transition-delay: 0.1s; }
-    .reveal-delay-2 { transition-delay: 0.2s; }
-    .reveal-delay-3 { transition-delay: 0.3s; }
-    .reveal-delay-4 { transition-delay: 0.4s; }
-    .reveal-delay-5 { transition-delay: 0.5s; }
+    .reveal {
+      opacity: 0;
+      -webkit-transform: translateY(60px); transform: translateY(60px);
+      -webkit-transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), -webkit-transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: opacity, transform;
+    }
+    .reveal.visible { opacity: 1; -webkit-transform: translateY(0); transform: translateY(0); }
+    .reveal-delay-1 { -webkit-transition-delay: 0.1s; transition-delay: 0.1s; }
+    .reveal-delay-2 { -webkit-transition-delay: 0.2s; transition-delay: 0.2s; }
+    .reveal-delay-3 { -webkit-transition-delay: 0.3s; transition-delay: 0.3s; }
+    .reveal-delay-4 { -webkit-transition-delay: 0.4s; transition-delay: 0.4s; }
+    .reveal-delay-5 { -webkit-transition-delay: 0.5s; transition-delay: 0.5s; }
 
     @media (prefers-reduced-motion: reduce) {
-      .reveal { opacity: 1; transform: none; transition: none; }
-      .gradient-orb, .text-shimmer, .text-shimmer-secondary, .node-pulse, .data-flow { animation: none !important; }
-      .cursor-dot, .cursor-ring, .cursor-glow, .cursor-trail { display: none !important; }
-      * { cursor: auto !important; }
-    }
-    @media (hover: none) and (pointer: coarse) {
+      .reveal { opacity: 1; -webkit-transform: none; transform: none; -webkit-transition: none; transition: none; }
+      .gradient-orb, .text-shimmer, .text-shimmer-secondary, .node-pulse, .data-flow { -webkit-animation: none !important; animation: none !important; }
       .cursor-dot, .cursor-ring, .cursor-glow, .cursor-trail { display: none !important; }
       * { cursor: auto !important; }
     }
 
-    /* ===== TEXT EFFECTS ===== */
+    /* ===== TEXT ===== */
     .text-glow { text-shadow: 0 0 40px rgba(0, 255, 136, 0.5); }
     .text-glow-pink { text-shadow: 0 0 40px rgba(255, 0, 110, 0.5); }
-    .text-shimmer { background: linear-gradient(90deg, var(--fg) 0%, var(--accent) 25%, var(--accent-tertiary) 50%, var(--accent) 75%, var(--fg) 100%); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; animation: shimmer 4s linear infinite; }
-    .text-shimmer-secondary { background: linear-gradient(90deg, var(--fg) 0%, var(--accent-tertiary) 25%, var(--accent-secondary) 50%, var(--accent-tertiary) 75%, var(--fg) 100%); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; animation: shimmer 5s linear infinite; animation-delay: -1.5s; }
+    @media (max-width: 480px) {
+      .text-glow { text-shadow: 0 0 20px rgba(0, 255, 136, 0.4); }
+      .text-glow-pink { text-shadow: 0 0 20px rgba(255, 0, 110, 0.4); }
+    }
+
+    .text-shimmer {
+      background: linear-gradient(90deg, var(--fg) 0%, var(--accent) 25%, var(--accent-tertiary) 50%, var(--accent) 75%, var(--fg) 100%);
+      background-size: 200% auto;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text; color: transparent;
+      -webkit-animation: shimmer 4s linear infinite; animation: shimmer 4s linear infinite;
+    }
+    .text-shimmer-secondary {
+      background: linear-gradient(90deg, var(--fg) 0%, var(--accent-tertiary) 25%, var(--accent-secondary) 50%, var(--accent-tertiary) 75%, var(--fg) 100%);
+      background-size: 200% auto;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text; color: transparent;
+      -webkit-animation: shimmer 5s linear infinite; animation: shimmer 5s linear infinite;
+      -webkit-animation-delay: -1.5s; animation-delay: -1.5s;
+    }
+    @-webkit-keyframes shimmer { 0% { background-position: 0% center; } 100% { background-position: 200% center; } }
     @keyframes shimmer { 0% { background-position: 0% center; } 100% { background-position: 200% center; } }
 
     /* ===== NAV ===== */
-    .nav-glass { background: rgba(5, 5, 5, 0.7); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
-    .nav-link { position: relative; color: var(--muted); font-size: 0.875rem; font-weight: 500; padding: 0.5rem 0; transition: color 0.3s ease; }
-    .nav-link::before { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background: linear-gradient(90deg, var(--accent), var(--accent-tertiary)); transform: scaleX(0); transform-origin: right; transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+    .nav-glass {
+      background: rgba(5, 5, 5, 0.85);
+      -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .nav-link {
+      position: relative; color: var(--muted); font-size: 0.875rem; font-weight: 500;
+      padding: 0.5rem 0; text-decoration: none;
+      -webkit-transition: color 0.3s ease; transition: color 0.3s ease;
+    }
+    .nav-link::before {
+      content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-tertiary));
+      -webkit-transform: scaleX(0); transform: scaleX(0);
+      -webkit-transform-origin: right; transform-origin: right;
+      -webkit-transition: -webkit-transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
     .nav-link:hover { color: var(--fg); }
-    .nav-link:hover::before { transform: scaleX(1); transform-origin: left; }
+    .nav-link:hover::before { -webkit-transform: scaleX(1); transform: scaleX(1); -webkit-transform-origin: left; transform-origin: left; }
 
-    .social-icon { display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 14px; background: var(--card); border: 1px solid var(--border); transition: all 0.3s ease; }
-    .social-icon:hover { border-color: var(--accent); background: rgba(0, 255, 136, 0.1); transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0, 255, 136, 0.2); }
-    .social-icon:hover svg { stroke: var(--accent); }
+    .social-icon {
+      display: flex; align-items: center; justify-content: center;
+      width: 48px; height: 48px; border-radius: 14px;
+      background: var(--card); border: 1px solid var(--border);
+      -webkit-transition: all 0.3s ease; transition: all 0.3s ease;
+      -webkit-tap-highlight-color: transparent; flex-shrink: 0;
+      position: relative; overflow: hidden;
+    }
+    @media (hover: hover) {
+      .social-icon:hover { border-color: var(--accent); background: rgba(0, 255, 136, 0.1); -webkit-transform: translateY(-3px); transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0, 255, 136, 0.2); }
+      .social-icon:hover svg { stroke: var(--accent); }
+    }
+    @media (max-width: 480px) { .social-icon { width: 40px; height: 40px; border-radius: 10px; } }
+
+    /* ===== MOBILE MENU ===== */
+    .mobile-menu-btn {
+      display: none; flex-direction: column; gap: 5px;
+      background: none; border: none; padding: 10px; z-index: 60;
+      -webkit-tap-highlight-color: transparent;
+      position: relative; width: 44px; height: 44px;
+      align-items: center; justify-content: center;
+    }
+    .mobile-menu-btn span {
+      display: block; width: 22px; height: 2px; background: var(--fg);
+      -webkit-transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      border-radius: 2px; position: absolute;
+    }
+    .mobile-menu-btn span:nth-child(1) { -webkit-transform: translateY(-7px); transform: translateY(-7px); }
+    .mobile-menu-btn span:nth-child(2) { -webkit-transform: translateY(0); transform: translateY(0); }
+    .mobile-menu-btn span:nth-child(3) { -webkit-transform: translateY(7px); transform: translateY(7px); }
+    .mobile-menu-btn.active span:nth-child(1) { -webkit-transform: translateY(0) rotate(45deg); transform: translateY(0) rotate(45deg); background: var(--accent-secondary); }
+    .mobile-menu-btn.active span:nth-child(2) { opacity: 0; -webkit-transform: translateX(10px); transform: translateX(10px); }
+    .mobile-menu-btn.active span:nth-child(3) { -webkit-transform: translateY(0) rotate(-45deg); transform: translateY(0) rotate(-45deg); background: var(--accent-secondary); }
+
+    .mobile-menu {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(5, 5, 5, 0.98);
+      -webkit-backdrop-filter: blur(30px); backdrop-filter: blur(30px);
+      z-index: 55; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 0.5rem;
+      opacity: 0; visibility: hidden;
+      -webkit-transform: scale(0.95); transform: scale(0.95);
+      -webkit-transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.4s, -webkit-transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.4s, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .mobile-menu.active { opacity: 1; visibility: visible; -webkit-transform: scale(1); transform: scale(1); }
+    .mobile-menu a {
+      font-family: 'Space Grotesk', sans-serif; font-size: 1.5rem; font-weight: 600;
+      color: var(--muted); text-decoration: none; padding: 0.75rem 2rem;
+      border-radius: 16px; -webkit-tap-highlight-color: transparent;
+      opacity: 0; -webkit-transform: translateY(20px); transform: translateY(20px);
+      -webkit-transition: color 0.3s ease, background 0.3s ease, opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), -webkit-transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: color 0.3s ease, background 0.3s ease, opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .mobile-menu.active a { opacity: 1; -webkit-transform: translateY(0); transform: translateY(0); }
+    .mobile-menu.active a:nth-child(1) { -webkit-transition-delay: 0.05s; transition-delay: 0.05s; }
+    .mobile-menu.active a:nth-child(2) { -webkit-transition-delay: 0.1s; transition-delay: 0.1s; }
+    .mobile-menu.active a:nth-child(3) { -webkit-transition-delay: 0.15s; transition-delay: 0.15s; }
+    .mobile-menu.active a:nth-child(4) { -webkit-transition-delay: 0.2s; transition-delay: 0.2s; }
+    .mobile-menu.active a:nth-child(5) { -webkit-transition-delay: 0.25s; transition-delay: 0.25s; }
+    .mobile-menu.active a:nth-child(6) { -webkit-transition-delay: 0.3s; transition-delay: 0.3s; }
+    .mobile-menu.active a:nth-child(7) { -webkit-transition-delay: 0.35s; transition-delay: 0.35s; }
+    .mobile-menu a:active { color: var(--accent-secondary); background: rgba(255, 0, 110, 0.08); }
+    .mobile-menu a.home-link { color: var(--accent-secondary); font-size: 1.125rem; margin-bottom: 0.5rem; border: 1px solid rgba(255, 0, 110, 0.2); background: rgba(255, 0, 110, 0.05); }
+
+    @media (max-width: 768px) { .mobile-menu-btn { display: flex; } }
+    @media (max-width: 320px) { .mobile-menu a { font-size: 1.125rem; padding: 0.625rem 1.5rem; } }
 
     /* ===== BUTTONS ===== */
-    .btn-primary { position: relative; display: inline-flex; align-items: center; gap: 0.75rem; padding: 1rem 2rem; background: var(--accent); color: var(--bg); font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 0.9375rem; border-radius: 100px; border: none; cursor: none; overflow: hidden; transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease; }
-    .btn-primary::before { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent); transform: translateX(-100%); transition: transform 0.5s ease; }
-    .btn-primary:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 0 40px rgba(0, 255, 136, 0.4); }
-    .btn-primary:hover::before { transform: translateX(100%); }
+    .btn-primary {
+      position: relative; display: inline-flex; align-items: center; gap: 0.75rem;
+      padding: 1rem 2rem; background: var(--accent); color: var(--bg);
+      font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 0.9375rem;
+      border-radius: 100px; border: none; overflow: hidden;
+      -webkit-transition: -webkit-transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+      text-decoration: none; -webkit-tap-highlight-color: transparent;
+    }
+    .btn-primary::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      -webkit-transform: translateX(-100%); transform: translateX(-100%);
+      -webkit-transition: -webkit-transform 0.5s ease; transition: transform 0.5s ease;
+    }
+    @media (hover: hover) {
+      .btn-primary:hover { -webkit-transform: translateY(-3px) scale(1.02); transform: translateY(-3px) scale(1.02); box-shadow: 0 0 40px rgba(0, 255, 136, 0.4); }
+      .btn-primary:hover::before { -webkit-transform: translateX(100%); transform: translateX(100%); }
+    }
 
-    .btn-secondary { display: inline-flex; align-items: center; gap: 0.5rem; padding: 1rem 1.75rem; background: transparent; color: var(--fg); font-family: 'Space Grotesk', sans-serif; font-weight: 500; font-size: 0.9375rem; border-radius: 100px; border: 1px solid var(--border); cursor: none; transition: all 0.3s ease; text-decoration: none; }
-    .btn-secondary:hover { border-color: var(--accent); background: rgba(0, 255, 136, 0.05); box-shadow: 0 0 20px rgba(0, 255, 136, 0.1); }
+    .btn-secondary {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 1rem 1.75rem; background: transparent; color: var(--fg);
+      font-family: 'Space Grotesk', sans-serif; font-weight: 500; font-size: 0.9375rem;
+      border-radius: 100px; border: 1px solid var(--border);
+      -webkit-transition: all 0.3s ease; transition: all 0.3s ease;
+      text-decoration: none; -webkit-tap-highlight-color: transparent;
+      position: relative; overflow: hidden;
+    }
+    @media (hover: hover) { .btn-secondary:hover { border-color: var(--accent); background: rgba(0, 255, 136, 0.05); box-shadow: 0 0 20px rgba(0, 255, 136, 0.1); } }
 
-    .btn-pink { position: relative; display: inline-flex; align-items: center; gap: 0.75rem; padding: 1rem 2rem; background: var(--accent-secondary); color: var(--fg); font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 0.9375rem; border-radius: 100px; border: none; cursor: none; overflow: hidden; transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease; text-decoration: none; }
-    .btn-pink:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 0 40px rgba(255, 0, 110, 0.4); }
+    .btn-pink {
+      position: relative; display: inline-flex; align-items: center; gap: 0.75rem;
+      padding: 1rem 2rem; background: var(--accent-secondary); color: var(--fg);
+      font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 0.9375rem;
+      border-radius: 100px; border: none; overflow: hidden;
+      -webkit-transition: -webkit-transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+      text-decoration: none; -webkit-tap-highlight-color: transparent;
+    }
+    .btn-pink::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      -webkit-transform: translateX(-100%); transform: translateX(-100%);
+      -webkit-transition: -webkit-transform 0.5s ease; transition: transform 0.5s ease;
+    }
+    @media (hover: hover) {
+      .btn-pink:hover { -webkit-transform: translateY(-3px) scale(1.02); transform: translateY(-3px) scale(1.02); box-shadow: 0 0 40px rgba(255, 0, 110, 0.4); }
+      .btn-pink:hover::before { -webkit-transform: translateX(100%); transform: translateX(100%); }
+    }
+
+    @media (max-width: 480px) { .btn-primary, .btn-secondary, .btn-pink { padding: 0.875rem 1.25rem; font-size: 0.8125rem; width: 100%; justify-content: center; } }
+    @media (max-width: 320px) { .btn-primary, .btn-secondary, .btn-pink { padding: 0.75rem 1rem; font-size: 0.75rem; } }
 
     /* ===== LABELS ===== */
-    .section-label { display: inline-flex; align-items: center; gap: 0.75rem; padding: 0.5rem 1rem; background: rgba(0, 255, 136, 0.05); border: 1px solid rgba(0, 255, 136, 0.2); border-radius: 100px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); }
-    .section-label::before { content: ''; width: 6px; height: 6px; background: var(--accent); border-radius: 50%; animation: statusPulse 2s ease-in-out infinite; }
+    .section-label {
+      display: inline-flex; align-items: center; gap: 0.75rem; padding: 0.5rem 1rem;
+      background: rgba(0, 255, 136, 0.05); border: 1px solid rgba(0, 255, 136, 0.2);
+      border-radius: 100px; font-size: 0.75rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent);
+    }
+    .section-label::before { content: ''; width: 6px; height: 6px; background: var(--accent); border-radius: 50%; -webkit-animation: statusPulse 2s ease-in-out infinite; animation: statusPulse 2s ease-in-out infinite; flex-shrink: 0; }
     .section-label-pink { display: inline-flex; align-items: center; gap: 0.75rem; padding: 0.5rem 1rem; background: rgba(255, 0, 110, 0.05); border: 1px solid rgba(255, 0, 110, 0.2); border-radius: 100px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent-secondary); }
-    .section-label-pink::before { content: ''; width: 6px; height: 6px; background: var(--accent-secondary); border-radius: 50%; animation: statusPulse 2s ease-in-out infinite; }
+    .section-label-pink::before { content: ''; width: 6px; height: 6px; background: var(--accent-secondary); border-radius: 50%; -webkit-animation: statusPulse 2s ease-in-out infinite; animation: statusPulse 2s ease-in-out infinite; flex-shrink: 0; }
     .section-label-cyan { display: inline-flex; align-items: center; gap: 0.75rem; padding: 0.5rem 1rem; background: rgba(0, 212, 255, 0.05); border: 1px solid rgba(0, 212, 255, 0.2); border-radius: 100px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent-tertiary); }
-    .section-label-cyan::before { content: ''; width: 6px; height: 6px; background: var(--accent-tertiary); border-radius: 50%; animation: statusPulse 2s ease-in-out infinite; }
+    .section-label-cyan::before { content: ''; width: 6px; height: 6px; background: var(--accent-tertiary); border-radius: 50%; -webkit-animation: statusPulse 2s ease-in-out infinite; animation: statusPulse 2s ease-in-out infinite; flex-shrink: 0; }
+    @-webkit-keyframes statusPulse { 0%, 100% { opacity: 1; -webkit-transform: scale(1); } 50% { opacity: 0.5; -webkit-transform: scale(1.3); } }
     @keyframes statusPulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.3); } }
+    @media (max-width: 320px) { .section-label, .section-label-pink, .section-label-cyan { font-size: 0.625rem; padding: 0.375rem 0.75rem; } }
+
+    /* ===== TAGS ===== */
+    .tag-pink { padding: 0.25rem 0.75rem; font-size: 0.75rem; border-radius: 100px; background: rgba(255, 0, 110, 0.1); color: var(--accent-secondary); border: 1px solid rgba(255, 0, 110, 0.2); font-weight: 500; display: inline-block; }
+    .tag-green { padding: 0.25rem 0.75rem; font-size: 0.75rem; border-radius: 100px; background: rgba(0, 255, 136, 0.1); color: var(--accent); border: 1px solid rgba(0, 255, 136, 0.2); font-weight: 500; display: inline-block; }
+    .tag-cyan { padding: 0.25rem 0.75rem; font-size: 0.75rem; border-radius: 100px; background: rgba(0, 212, 255, 0.1); color: var(--accent-tertiary); border: 1px solid rgba(0, 212, 255, 0.2); font-weight: 500; display: inline-block; }
+    @media (max-width: 480px) { .tag-pink, .tag-green, .tag-cyan { font-size: 0.625rem; padding: 0.2rem 0.5rem; } }
 
     /* ===== CARDS ===== */
-    .workflow-card { position: relative; background: var(--card); border-radius: 20px; overflow: hidden; border: 1px solid var(--border); transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
-    .workflow-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255, 0, 110, 0.1) 0%, transparent 50%, rgba(0, 255, 136, 0.1) 100%); opacity: 0; transition: opacity 0.5s ease; z-index: 1; pointer-events: none; }
-    .workflow-card:hover { transform: translateY(-8px) scale(1.01); border-color: rgba(255, 0, 110, 0.3); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 60px -15px rgba(255, 0, 110, 0.3); }
-    .workflow-card:hover::before { opacity: 1; }
+    .workflow-card {
+      position: relative; background: var(--card); border-radius: 20px; overflow: hidden;
+      border: 1px solid var(--border);
+      -webkit-transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .workflow-card::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(255, 0, 110, 0.1) 0%, transparent 50%, rgba(0, 255, 136, 0.1) 100%);
+      opacity: 0; -webkit-transition: opacity 0.5s ease; transition: opacity 0.5s ease;
+      z-index: 1; pointer-events: none;
+    }
+    @media (hover: hover) {
+      .workflow-card:hover { -webkit-transform: translateY(-8px) scale(1.01); transform: translateY(-8px) scale(1.01); border-color: rgba(255, 0, 110, 0.3); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 60px -15px rgba(255, 0, 110, 0.3); }
+      .workflow-card:hover::before { opacity: 1; }
+    }
+    @media (max-width: 480px) { .workflow-card { border-radius: 14px; } }
 
-    .stat-card { position: relative; background: var(--card); border-radius: 20px; overflow: hidden; border: 1px solid var(--border); transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
-    .stat-card:hover { transform: translateY(-5px); border-color: rgba(255, 0, 110, 0.3); box-shadow: 0 15px 40px -10px rgba(0, 0, 0, 0.4), 0 0 40px -10px rgba(255, 0, 110, 0.2); }
+    .stat-card {
+      position: relative; background: var(--card); border-radius: 20px; overflow: hidden;
+      border: 1px solid var(--border);
+      -webkit-transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      -webkit-tap-highlight-color: transparent;
+    }
+    @media (hover: hover) { .stat-card:hover { -webkit-transform: translateY(-5px); transform: translateY(-5px); border-color: rgba(255, 0, 110, 0.3); box-shadow: 0 15px 40px -10px rgba(0, 0, 0, 0.4), 0 0 40px -10px rgba(255, 0, 110, 0.2); } }
+    @media (max-width: 480px) { .stat-card { border-radius: 14px; } }
 
-    .feature-card { position: relative; background: var(--card); border-radius: 16px; overflow: hidden; border: 1px solid var(--border); transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-    .feature-card:hover { transform: translateY(-5px); border-color: rgba(0, 255, 136, 0.3); box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.4); }
+    .feature-card {
+      position: relative; background: var(--card); border-radius: 16px; overflow: hidden;
+      border: 1px solid var(--border);
+      -webkit-transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      -webkit-tap-highlight-color: transparent;
+    }
+    @media (hover: hover) { .feature-card:hover { -webkit-transform: translateY(-5px); transform: translateY(-5px); border-color: rgba(0, 255, 136, 0.3); box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.4); } }
+    @media (max-width: 480px) { .feature-card { border-radius: 12px; } }
 
     /* ===== WORKFLOW NODES ===== */
-    .node { display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1.25rem; background: var(--card); border: 1px solid var(--border); border-radius: 14px; transition: all 0.3s ease; position: relative; }
-    .node:hover { border-color: rgba(255, 0, 110, 0.4); box-shadow: 0 0 25px rgba(255, 0, 110, 0.15); transform: translateX(5px); }
-    .node-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .node-connector { width: 2px; height: 24px; background: linear-gradient(to bottom, var(--accent-secondary), transparent); margin-left: 2.75rem; }
+    .node {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.875rem 1rem; background: var(--card);
+      border: 1px solid var(--border); border-radius: 14px;
+      -webkit-transition: all 0.3s ease; transition: all 0.3s ease;
+      position: relative; -webkit-tap-highlight-color: transparent;
+    }
+    @media (hover: hover) { .node:hover { border-color: rgba(255, 0, 110, 0.4); box-shadow: 0 0 25px rgba(255, 0, 110, 0.15); -webkit-transform: translateX(5px); transform: translateX(5px); } }
+    .node-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .node-connector { width: 2px; height: 20px; background: linear-gradient(to bottom, var(--accent-secondary), transparent); margin-left: 2.25rem; }
 
-    .node-pulse { animation: nodePulse 3s ease-in-out infinite; }
+    .node-pulse { -webkit-animation: nodePulse 3s ease-in-out infinite; animation: nodePulse 3s ease-in-out infinite; }
+    @-webkit-keyframes nodePulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(255, 0, 110, 0); } 50% { box-shadow: 0 0 0 8px rgba(255, 0, 110, 0.1); } }
     @keyframes nodePulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(255, 0, 110, 0); } 50% { box-shadow: 0 0 0 8px rgba(255, 0, 110, 0.1); } }
 
-    /* ===== DATA FLOW LINE ===== */
+    @media (max-width: 480px) {
+      .node { padding: 0.75rem; border-radius: 12px; gap: 0.5rem; }
+      .node-icon { width: 32px; height: 32px; border-radius: 8px; }
+      .node-icon svg { width: 16px; height: 16px; }
+      .node-connector { margin-left: 1.75rem; height: 16px; }
+    }
+
+    /* ===== DATA FLOW ===== */
     .data-flow-container { position: relative; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; margin: 2rem 0; }
-    .data-flow { position: absolute; top: 0; left: -30%; width: 30%; height: 100%; background: linear-gradient(90deg, transparent, var(--accent-secondary), var(--accent), transparent); border-radius: 2px; animation: dataFlow 2.5s ease-in-out infinite; }
+    .data-flow {
+      position: absolute; top: 0; left: -30%; width: 30%; height: 100%;
+      background: linear-gradient(90deg, transparent, var(--accent-secondary), var(--accent), transparent);
+      border-radius: 2px;
+      -webkit-animation: dataFlow 2.5s ease-in-out infinite; animation: dataFlow 2.5s ease-in-out infinite;
+    }
+    @-webkit-keyframes dataFlow { 0% { left: -30%; } 100% { left: 100%; } }
     @keyframes dataFlow { 0% { left: -30%; } 100% { left: 100%; } }
 
     /* ===== STEP INDICATOR ===== */
-    .step-number { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1.125rem; flex-shrink: 0; border: 2px solid; transition: all 0.3s ease; }
+    .step-number {
+      width: 40px; height: 40px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1rem;
+      flex-shrink: 0; border: 2px solid;
+      -webkit-transition: all 0.3s ease; transition: all 0.3s ease;
+    }
+    @media (min-width: 481px) { .step-number { width: 48px; height: 48px; font-size: 1.125rem; } }
 
     /* ===== BACK BUTTON ===== */
-    .back-btn { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--muted); font-size: 0.875rem; font-weight: 500; text-decoration: none; transition: all 0.3s ease; padding: 0.5rem 1rem; border-radius: 100px; border: 1px solid transparent; }
-    .back-btn:hover { color: var(--accent); border-color: rgba(0, 255, 136, 0.2); background: rgba(0, 255, 136, 0.05); }
-    .back-btn svg { transition: transform 0.3s ease; }
-    .back-btn:hover svg { transform: translateX(-4px); }
-
-    /* ===== TAG ===== */
-    .tag-pink { padding: 0.25rem 0.75rem; font-size: 0.75rem; border-radius: 100px; background: rgba(255, 0, 110, 0.1); color: var(--accent-secondary); border: 1px solid rgba(255, 0, 110, 0.2); font-weight: 500; }
-    .tag-green { padding: 0.25rem 0.75rem; font-size: 0.75rem; border-radius: 100px; background: rgba(0, 255, 136, 0.1); color: var(--accent); border: 1px solid rgba(0, 255, 136, 0.2); font-weight: 500; }
-    .tag-cyan { padding: 0.25rem 0.75rem; font-size: 0.75rem; border-radius: 100px; background: rgba(0, 212, 255, 0.1); color: var(--accent-tertiary); border: 1px solid rgba(0, 212, 255, 0.2); font-weight: 500; }
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      color: var(--muted); font-size: 0.875rem; font-weight: 500;
+      text-decoration: none;
+      -webkit-transition: all 0.3s ease; transition: all 0.3s ease;
+      padding: 0.5rem 1rem; border-radius: 100px; border: 1px solid transparent;
+      -webkit-tap-highlight-color: transparent;
+    }
+    @media (hover: hover) {
+      .back-btn:hover { color: var(--accent); border-color: rgba(0, 255, 136, 0.2); background: rgba(0, 255, 136, 0.05); }
+      .back-btn:hover svg { -webkit-transform: translateX(-4px); transform: translateX(-4px); }
+    }
+    .back-btn:active { color: var(--accent); }
+    .back-btn svg { -webkit-transition: -webkit-transform 0.3s ease; transition: transform 0.3s ease; }
 
     /* ===== SCROLLBAR ===== */
-    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: var(--bg); }
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
-    section[id] { scroll-margin-top: 120px; }
+    section[id] { scroll-margin-top: 100px; }
+    @media (max-width: 768px) { section[id] { scroll-margin-top: 80px; } }
+    @media (hover: none) { a, button { min-height: 44px; } }
+
+    /* ===== SAFE AREA ===== */
+    @supports (padding: max(0px)) {
+      .nav-glass > div { padding-left: max(1rem, env(safe-area-inset-left)); padding-right: max(1rem, env(safe-area-inset-right)); }
+      footer > div { padding-bottom: max(0.5rem, env(safe-area-inset-bottom)); }
+    }
+
+    @media (max-height: 500px) and (orientation: landscape) {
+      header { padding-top: 5rem; }
+      header h1 { font-size: clamp(2rem, 8vw, 4rem) !important; }
+    }
   </style>
 </head>
 <body>
@@ -182,6 +541,9 @@
   <div class="cursor-trail" id="trail-4" aria-hidden="true"></div>
   <div class="cursor-trail" id="trail-5" aria-hidden="true"></div>
 
+  <!-- Touch Glow -->
+  <div class="touch-glow" id="touch-glow" aria-hidden="true"></div>
+
   <div class="gradient-bg" aria-hidden="true">
     <div class="gradient-orb orb-1"></div>
     <div class="gradient-orb orb-2"></div>
@@ -189,13 +551,24 @@
   </div>
   <div class="grid-pattern" aria-hidden="true"></div>
 
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobile-menu">
+    <a href="index.html" class="home-link">⌂ Home</a>
+    <a href="index.html#services">Services</a>
+    <a href="index.html#results">Results</a>
+    <a href="index.html#case-studies">Case Studies</a>
+    <a href="index.html#certification">Certification</a>
+    <a href="index.html#about">About</a>
+    <a href="index.html#contact">Contact</a>
+  </div>
+
   <!-- Navigation -->
   <nav class="fixed top-0 left-0 right-0 z-50 nav-glass">
-    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-      <a href="index.html" class="font-display text-2xl font-bold tracking-tight magnetic-target">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+      <a href="index.html" class="font-display text-xl sm:text-2xl font-bold tracking-tight magnetic-target" style="text-decoration:none;">
         <span class="text-glow" style="color: var(--accent);">T</span><span class="text-[var(--muted)]">.</span>
       </a>
-      <div class="hidden md:flex items-center gap-10">
+      <div class="hidden md:flex items-center gap-6 lg:gap-10">
         <a href="index.html#services" class="nav-link magnetic-target">Services</a>
         <a href="index.html#results" class="nav-link magnetic-target">Results</a>
         <a href="index.html#case-studies" class="nav-link magnetic-target">Case Studies</a>
@@ -203,152 +576,99 @@
         <a href="index.html#about" class="nav-link magnetic-target">About</a>
         <a href="index.html#contact" class="nav-link magnetic-target">Contact</a>
       </div>
-      <div class="flex items-center gap-4">
-        <a href="https://www.linkedin.com/in/tony-adijah-965903131/" target="_blank" rel="noopener noreferrer" class="social-icon magnetic-target" aria-label="LinkedIn Profile">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
-            <rect x="2" y="9" width="4" height="12"/>
-            <circle cx="4" cy="4" r="2"/>
-          </svg>
+      <div class="flex items-center gap-2 sm:gap-3">
+        <a href="https://www.linkedin.com/in/tony-adijah-965903131/" target="_blank" rel="noopener noreferrer" class="social-icon magnetic-target touch-ripple-container" aria-label="LinkedIn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
         </a>
+        <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle Menu" aria-expanded="false"><span></span><span></span><span></span></button>
       </div>
     </div>
   </nav>
 
-  <!-- Hero Section -->
-  <header class="relative z-10 pt-32 pb-20">
-    <div class="max-w-7xl mx-auto px-6">
-      <!-- Back Button -->
-      <a href="index.html#case-studies" class="back-btn reveal magnetic-target">
+  <!-- Hero -->
+  <header class="relative z-10 pt-24 sm:pt-32 pb-10 sm:pb-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+      <a href="n8n-case-study.html" class="back-btn reveal magnetic-target touch-ripple-container">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         Back to Case Studies
       </a>
 
-      <div class="mt-10 max-w-4xl">
-        <div class="flex flex-wrap items-center gap-3 mb-6 reveal reveal-delay-1">
+      <div class="mt-6 sm:mt-10 max-w-4xl">
+        <div class="flex flex-wrap items-center gap-2 sm:gap-3 mb-4 sm:mb-6 reveal reveal-delay-1">
           <span class="section-label-pink">n8n Workflow</span>
           <span class="tag-green">Self-Hosted</span>
           <span class="tag-cyan">Local AI</span>
         </div>
 
-        <h1 class="font-display text-5xl md:text-7xl lg:text-8xl font-bold leading-[0.95] tracking-tight reveal reveal-delay-2">
+        <h1 class="font-display text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-bold leading-[0.95] tracking-tight reveal reveal-delay-2">
           <span class="text-shimmer-secondary">AI SDR</span> —<br>
           <span class="text-[var(--muted)]">Fully Automated</span><br>
           <span class="text-shimmer">Cold Outreach</span>
         </h1>
 
-        <p class="text-xl md:text-2xl text-[var(--muted)] max-w-2xl mt-8 leading-relaxed reveal reveal-delay-3">
+        <p class="text-base sm:text-xl md:text-2xl text-[var(--muted)] max-w-2xl mt-5 sm:mt-8 leading-relaxed reveal reveal-delay-3">
           An autonomous outbound system powered by <span style="color: var(--accent);">local AI</span> that scores leads, generates <span style="color: var(--accent-secondary);">personalized emails</span>, and manages <span style="color: var(--accent-tertiary);">follow-up cadences</span> — no SaaS subscription required.
         </p>
 
-        <div class="flex flex-wrap gap-4 mt-10 reveal reveal-delay-4">
-          <a href="index.html#contact" class="btn-pink magnetic-target">
+        <div class="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 mt-6 sm:mt-10 reveal reveal-delay-4">
+          <a href="index.html#contact" class="btn-pink magnetic-target touch-ripple-container">
             Get This Template
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </a>
-          <a href="#workflow" class="btn-secondary magnetic-target">
+          <a href="#workflow" class="btn-secondary magnetic-target touch-ripple-container">
             See the Workflow
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
           </a>
         </div>
       </div>
 
-      <!-- Data Flow Animation -->
       <div class="data-flow-container reveal reveal-delay-4">
         <div class="data-flow"></div>
       </div>
 
-      <!-- Quick Stats -->
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 reveal reveal-delay-4">
-        <div class="stat-card p-6 text-center">
-          <div class="font-display text-3xl md:text-4xl font-bold text-glow-pink" style="color: var(--accent-secondary);">3</div>
-          <div class="text-sm text-[var(--muted)] mt-1">Automated Flows</div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mt-4 reveal reveal-delay-4">
+        <div class="stat-card p-4 sm:p-6 text-center touch-ripple-container">
+          <div class="font-display text-2xl sm:text-3xl md:text-4xl font-bold text-glow-pink" style="color: var(--accent-secondary);">3</div>
+          <div class="text-xs sm:text-sm text-[var(--muted)] mt-1">Automated Flows</div>
         </div>
-        <div class="stat-card p-6 text-center">
-          <div class="font-display text-3xl md:text-4xl font-bold text-glow" style="color: var(--accent);">Ollama</div>
-          <div class="text-sm text-[var(--muted)] mt-1">Local LLM</div>
+        <div class="stat-card p-4 sm:p-6 text-center touch-ripple-container">
+          <div class="font-display text-2xl sm:text-3xl md:text-4xl font-bold text-glow" style="color: var(--accent);">Ollama</div>
+          <div class="text-xs sm:text-sm text-[var(--muted)] mt-1">Local LLM</div>
         </div>
-        <div class="stat-card p-6 text-center">
-          <div class="font-display text-3xl md:text-4xl font-bold" style="color: var(--accent-tertiary);">0-100</div>
-          <div class="text-sm text-[var(--muted)] mt-1">AI Lead Scoring</div>
+        <div class="stat-card p-4 sm:p-6 text-center touch-ripple-container">
+          <div class="font-display text-2xl sm:text-3xl md:text-4xl font-bold" style="color: var(--accent-tertiary);">0-100</div>
+          <div class="text-xs sm:text-sm text-[var(--muted)] mt-1">AI Lead Scoring</div>
         </div>
-        <div class="stat-card p-6 text-center">
-          <div class="font-display text-3xl md:text-4xl font-bold" style="color: var(--fg);">Private</div>
-          <div class="text-sm text-[var(--muted)] mt-1">Self-Hosted</div>
+        <div class="stat-card p-4 sm:p-6 text-center touch-ripple-container">
+          <div class="font-display text-2xl sm:text-3xl md:text-4xl font-bold" style="color: var(--fg);">Private</div>
+          <div class="text-xs sm:text-sm text-[var(--muted)] mt-1">Self-Hosted</div>
         </div>
       </div>
     </div>
   </header>
 
   <!-- Who It's For -->
-  <section class="relative z-10 py-24 bg-[var(--bg-elevated)]">
-    <div class="max-w-7xl mx-auto px-6">
-      <div class="grid md:grid-cols-2 gap-12">
-        <!-- Who It's For -->
-        <div class="space-y-6 reveal">
+  <section class="relative z-10 py-16 sm:py-24 bg-[var(--bg-elevated)]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+      <div class="grid md:grid-cols-2 gap-8 sm:gap-12">
+        <div class="space-y-4 sm:space-y-6 reveal">
           <span class="section-label-cyan">Target Audience</span>
-          <h2 class="font-display text-3xl md:text-4xl font-bold mt-4">
-            Who Is This <span class="text-shimmer">For?</span>
-          </h2>
-          <div class="space-y-4 text-[var(--muted)]">
-            <div class="flex items-start gap-3">
-              <div class="w-6 h-6 rounded-full bg-[rgba(0,212,255,0.15)] flex items-center justify-center flex-shrink-0 mt-0.5">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent-tertiary)" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-              </div>
-              <p><strong class="text-[var(--fg)]">Founders</strong> who need outbound but lack the budget for a full SDR team.</p>
-            </div>
-            <div class="flex items-start gap-3">
-              <div class="w-6 h-6 rounded-full bg-[rgba(0,212,255,0.15)] flex items-center justify-center flex-shrink-0 mt-0.5">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent-tertiary)" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-              </div>
-              <p><strong class="text-[var(--fg)]">Sales Teams</strong> looking to automate repetitive prospecting tasks.</p>
-            </div>
-            <div class="flex items-start gap-3">
-              <div class="w-6 h-6 rounded-full bg-[rgba(0,212,255,0.15)] flex items-center justify-center flex-shrink-0 mt-0.5">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent-tertiary)" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-              </div>
-              <p><strong class="text-[var(--fg)]">Solopreneurs</strong> scaling outreach without scaling hours.</p>
-            </div>
-            <div class="flex items-start gap-3">
-              <div class="w-6 h-6 rounded-full bg-[rgba(0,212,255,0.15)] flex items-center justify-center flex-shrink-0 mt-0.5">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent-tertiary)" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-              </div>
-              <p><strong class="text-[var(--fg)]">Agencies</strong> running cold email campaigns for multiple clients.</p>
-            </div>
+          <h2 class="font-display text-2xl sm:text-3xl md:text-4xl font-bold mt-3 sm:mt-4">Who Is This <span class="text-shimmer">For?</span></h2>
+          <div class="space-y-3 sm:space-y-4 text-[var(--muted)] text-sm sm:text-base">
+            <div class="flex items-start gap-3"><div class="w-6 h-6 rounded-full bg-[rgba(0,212,255,0.15)] flex items-center justify-center flex-shrink-0 mt-0.5"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent-tertiary)" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><p><strong class="text-[var(--fg)]">Founders</strong> who need outbound but lack the budget for a full SDR team.</p></div>
+            <div class="flex items-start gap-3"><div class="w-6 h-6 rounded-full bg-[rgba(0,212,255,0.15)] flex items-center justify-center flex-shrink-0 mt-0.5"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent-tertiary)" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><p><strong class="text-[var(--fg)]">Sales Teams</strong> looking to automate repetitive prospecting tasks.</p></div>
+            <div class="flex items-start gap-3"><div class="w-6 h-6 rounded-full bg-[rgba(0,212,255,0.15)] flex items-center justify-center flex-shrink-0 mt-0.5"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent-tertiary)" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><p><strong class="text-[var(--fg)]">Solopreneurs</strong> scaling outreach without scaling hours.</p></div>
+            <div class="flex items-start gap-3"><div class="w-6 h-6 rounded-full bg-[rgba(0,212,255,0.15)] flex items-center justify-center flex-shrink-0 mt-0.5"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent-tertiary)" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><p><strong class="text-[var(--fg)]">Agencies</strong> running cold email campaigns for multiple clients.</p></div>
           </div>
         </div>
-
-        <!-- Requirements -->
-        <div class="space-y-6 reveal reveal-delay-1">
+        <div class="space-y-4 sm:space-y-6 reveal reveal-delay-1">
           <span class="section-label-pink">Requirements</span>
-          <h2 class="font-display text-3xl md:text-4xl font-bold mt-4">
-            What You'll <span class="text-[var(--muted)]">Need</span>
-          </h2>
-          <div class="space-y-4 text-[var(--muted)]">
-            <div class="flex items-start gap-3">
-              <div class="w-6 h-6 rounded-full bg-[rgba(255,0,110,0.15)] flex items-center justify-center flex-shrink-0 mt-0.5">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent-secondary)" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-              </div>
-              <p><strong class="text-[var(--fg)]">Self-hosted n8n</strong> (uses native Ollama nodes).</p>
-            </div>
-            <div class="flex items-start gap-3">
-              <div class="w-6 h-6 rounded-full bg-[rgba(255,0,110,0.15)] flex items-center justify-center flex-shrink-0 mt-0.5">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent-secondary)" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6m11-7h-6m-6 0H1"/></svg>
-              </div>
-              <p><strong class="text-[var(--fg)]">Ollama</strong> running locally with a model installed (e.g., Mistral).</p>
-            </div>
-            <div class="flex items-start gap-3">
-              <div class="w-6 h-6 rounded-full bg-[rgba(255,0,110,0.15)] flex items-center justify-center flex-shrink-0 mt-0.5">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent-secondary)" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-              </div>
-              <p><strong class="text-[var(--fg)]">Google Sheets & Gmail</strong> OAuth2 credentials.</p>
-            </div>
-            <div class="flex items-start gap-3">
-              <div class="w-6 h-6 rounded-full bg-[rgba(255,0,110,0.15)] flex items-center justify-center flex-shrink-0 mt-0.5">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent-secondary)" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-              </div>
-              <p><strong class="text-[var(--fg)]">Telegram Bot</strong> credentials for real-time alerts.</p>
-            </div>
+          <h2 class="font-display text-2xl sm:text-3xl md:text-4xl font-bold mt-3 sm:mt-4">What You'll <span class="text-[var(--muted)]">Need</span></h2>
+          <div class="space-y-3 sm:space-y-4 text-[var(--muted)] text-sm sm:text-base">
+            <div class="flex items-start gap-3"><div class="w-6 h-6 rounded-full bg-[rgba(255,0,110,0.15)] flex items-center justify-center flex-shrink-0 mt-0.5"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent-secondary)" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div><p><strong class="text-[var(--fg)]">Self-hosted n8n</strong> (uses native Ollama nodes).</p></div>
+            <div class="flex items-start gap-3"><div class="w-6 h-6 rounded-full bg-[rgba(255,0,110,0.15)] flex items-center justify-center flex-shrink-0 mt-0.5"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent-secondary)" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6m11-7h-6m-6 0H1"/></svg></div><p><strong class="text-[var(--fg)]">Ollama</strong> running locally with a model installed (e.g., Mistral).</p></div>
+            <div class="flex items-start gap-3"><div class="w-6 h-6 rounded-full bg-[rgba(255,0,110,0.15)] flex items-center justify-center flex-shrink-0 mt-0.5"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent-secondary)" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div><p><strong class="text-[var(--fg)]">Google Sheets & Gmail</strong> OAuth2 credentials.</p></div>
+            <div class="flex items-start gap-3"><div class="w-6 h-6 rounded-full bg-[rgba(255,0,110,0.15)] flex items-center justify-center flex-shrink-0 mt-0.5"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent-secondary)" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><p><strong class="text-[var(--fg)]">Telegram Bot</strong> credentials for real-time alerts.</p></div>
           </div>
         </div>
       </div>
@@ -356,37 +676,32 @@
   </section>
 
   <!-- Workflow Breakdown -->
-  <section id="workflow" class="relative z-10 py-32">
-    <div class="max-w-7xl mx-auto px-6">
-      <div class="text-center mb-12">
+  <section id="workflow" class="relative z-10 py-16 sm:py-24 md:py-32">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+      <div class="text-center mb-8 sm:mb-12">
         <span class="section-label-pink reveal">How It Works</span>
-        <h2 class="font-display text-5xl md:text-6xl font-bold mt-6 reveal reveal-delay-1">
-          Workflow <span class="text-shimmer-secondary">Breakdown</span>
-        </h2>
-        <p class="text-[var(--muted)] max-w-2xl mx-auto mt-4 reveal reveal-delay-2">
-          Three synchronized flows running on weekday schedules.
-        </p>
+        <h2 class="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mt-4 sm:mt-6 reveal reveal-delay-1">Workflow <span class="text-shimmer-secondary">Breakdown</span></h2>
+        <p class="text-[var(--muted)] max-w-2xl mx-auto mt-3 sm:mt-4 text-sm sm:text-base reveal reveal-delay-2">Three synchronized flows running on weekday schedules.</p>
       </div>
 
-      <!-- Workflow Image -->
-      <div class="mt-12 mb-20 reveal reveal-delay-2 max-w-5xl mx-auto">
-        <div class="relative rounded-2xl border border-[var(--border)] overflow-hidden bg-[var(--card)] shadow-2xl">
-          <img src="AI SDR — Fully Automated Cold Outreach with Scoring and Follow-ups.png" alt="Workflow diagram for AI SDR" class="w-full h-auto object-cover">
+      <div class="mt-8 sm:mt-12 mb-12 sm:mb-20 reveal reveal-delay-2 max-w-5xl mx-auto">
+        <div class="relative rounded-xl sm:rounded-2xl border border-[var(--border)] overflow-hidden bg-[var(--card)] shadow-2xl">
+          <img src="AI SDR — Fully Automated Cold Outreach with Scoring and Follow-ups.png" alt="Workflow diagram for AI SDR" class="w-full h-auto object-cover" loading="lazy">
           <div class="absolute inset-0 bg-gradient-to-t from-[var(--bg)] via-transparent to-transparent opacity-20 pointer-events-none"></div>
         </div>
       </div>
 
       <div class="max-w-3xl mx-auto">
         <!-- Flow 1 -->
-        <div class="flex gap-6 mb-4 reveal">
+        <div class="flex gap-4 sm:gap-6 mb-4 reveal">
           <div class="flex flex-col items-center">
             <div class="step-number" style="border-color: var(--accent-secondary); color: var(--accent-secondary);">1</div>
             <div class="flex-1 w-0.5 bg-gradient-to-b from-[var(--accent-secondary)] to-transparent mt-3"></div>
           </div>
-          <div class="pb-12">
-            <h3 class="font-display text-2xl font-bold mb-2">New Lead Processing</h3>
-            <p class="text-[var(--muted)] mb-4"><strong class="text-[var(--fg)]">Runs at 8 AM on weekdays.</strong> Reads new leads from Google Sheets, scrapes their website to build a research dossier, and AI scores each lead (0–100) based on company fit, role match, and timing signals.</p>
-            <div class="flex flex-wrap gap-2">
+          <div class="pb-8 sm:pb-12">
+            <h3 class="font-display text-xl sm:text-2xl font-bold mb-2">New Lead Processing</h3>
+            <p class="text-[var(--muted)] mb-3 sm:mb-4 text-sm sm:text-base"><strong class="text-[var(--fg)]">Runs at 8 AM on weekdays.</strong> Reads new leads from Google Sheets, scrapes their website to build a research dossier, and AI scores each lead (0–100) based on company fit, role match, and timing signals.</p>
+            <div class="flex flex-wrap gap-1.5 sm:gap-2">
               <span class="tag-pink">Sheets Trigger</span>
               <span class="tag-green">Web Scraper</span>
               <span class="tag-cyan">AI Scoring</span>
@@ -395,48 +710,48 @@
         </div>
 
         <!-- Flow 1 Nodes -->
-        <div class="max-w-md ml-16 mb-8 reveal reveal-delay-1">
-          <div class="node node-pulse">
+        <div class="max-w-sm sm:max-w-md ml-10 sm:ml-16 mb-6 sm:mb-8 reveal reveal-delay-1">
+          <div class="node node-pulse touch-ripple-container">
             <div class="node-icon bg-gradient-to-br from-[var(--accent-secondary)] to-[var(--accent)]">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
             </div>
             <div>
-              <div class="font-display text-sm font-bold">Read Google Sheets</div>
-              <div class="text-xs text-[var(--muted)]">Filter by Status = 'New'</div>
+              <div class="font-display text-xs sm:text-sm font-bold">Read Google Sheets</div>
+              <div class="text-[10px] sm:text-xs text-[var(--muted)]">Filter by Status = 'New'</div>
             </div>
           </div>
           <div class="node-connector"></div>
-          <div class="node">
+          <div class="node touch-ripple-container">
             <div class="node-icon bg-gradient-to-br from-[var(--accent)] to-[var(--accent-tertiary)]">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
             </div>
             <div>
-              <div class="font-display text-sm font-bold">Scrape Website</div>
-              <div class="text-xs text-[var(--muted)]">Build Research Dossier</div>
+              <div class="font-display text-xs sm:text-sm font-bold">Scrape Website</div>
+              <div class="text-[10px] sm:text-xs text-[var(--muted)]">Build Research Dossier</div>
             </div>
           </div>
           <div class="node-connector"></div>
-          <div class="node">
+          <div class="node touch-ripple-container">
             <div class="node-icon bg-gradient-to-br from-[var(--accent-tertiary)] to-[var(--accent-secondary)]">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/><path d="M12 6v6l4 2"/></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
             </div>
             <div class="flex-1">
-              <div class="font-display text-sm font-bold">Ollama LLM</div>
-              <div class="text-xs text-[var(--muted)]">Score 0-100 & Generate 3 Emails</div>
+              <div class="font-display text-xs sm:text-sm font-bold">Ollama LLM</div>
+              <div class="text-[10px] sm:text-xs text-[var(--muted)]">Score 0-100 & Generate 3 Emails</div>
             </div>
           </div>
         </div>
 
         <!-- Flow 2 -->
-        <div class="flex gap-6 mb-4 reveal reveal-delay-2">
+        <div class="flex gap-4 sm:gap-6 mb-4 reveal reveal-delay-2">
           <div class="flex flex-col items-center">
             <div class="step-number" style="border-color: var(--accent); color: var(--accent);">2</div>
             <div class="flex-1 w-0.5 bg-gradient-to-b from-[var(--accent)] to-transparent mt-3"></div>
           </div>
-          <div class="pb-12">
-            <h3 class="font-display text-2xl font-bold mb-2">Follow-up Engine</h3>
-            <p class="text-[var(--muted)] mb-4"><strong class="text-[var(--fg)]">Runs every 2 hours on weekdays.</strong> Checks for leads needing follow-ups. Sends Email 2 after 3 days and Email 3 after 7 days. Automatically marks sequence complete and skips replied leads.</p>
-            <div class="flex flex-wrap gap-2">
+          <div class="pb-8 sm:pb-12">
+            <h3 class="font-display text-xl sm:text-2xl font-bold mb-2">Follow-up Engine</h3>
+            <p class="text-[var(--muted)] mb-3 sm:mb-4 text-sm sm:text-base"><strong class="text-[var(--fg)]">Runs every 2 hours on weekdays.</strong> Checks for leads needing follow-ups. Sends Email 2 after 3 days and Email 3 after 7 days. Automatically marks sequence complete and skips replied leads.</p>
+            <div class="flex flex-wrap gap-1.5 sm:gap-2">
               <span class="tag-green">Timed Triggers</span>
               <span class="tag-pink">Cadence Logic</span>
               <span class="tag-cyan">Gmail Send</span>
@@ -444,33 +759,32 @@
           </div>
         </div>
 
-        <!-- Flow 2 Visualization -->
-        <div class="max-w-md ml-16 mb-8 reveal reveal-delay-3">
+        <div class="max-w-sm sm:max-w-md ml-10 sm:ml-16 mb-6 sm:mb-8 reveal reveal-delay-3">
           <div class="grid grid-cols-3 gap-2">
-            <div class="text-center p-3 rounded-xl border border-[rgba(255,0,110,0.3)] bg-[rgba(255,0,110,0.05)]">
-              <div class="font-display text-lg font-bold" style="color: var(--accent-secondary);">D1</div>
-              <div class="text-xs text-[var(--muted)] mt-1">Initial Send</div>
+            <div class="text-center p-2 sm:p-3 rounded-xl border border-[rgba(255,0,110,0.3)] bg-[rgba(255,0,110,0.05)]">
+              <div class="font-display text-base sm:text-lg font-bold" style="color: var(--accent-secondary);">D1</div>
+              <div class="text-[10px] sm:text-xs text-[var(--muted)] mt-1">Initial Send</div>
             </div>
-            <div class="text-center p-3 rounded-xl border border-[rgba(0,255,136,0.3)] bg-[rgba(0,255,136,0.05)]">
-              <div class="font-display text-lg font-bold" style="color: var(--accent);">D3</div>
-              <div class="text-xs text-[var(--muted)] mt-1">Follow-up #1</div>
+            <div class="text-center p-2 sm:p-3 rounded-xl border border-[rgba(0,255,136,0.3)] bg-[rgba(0,255,136,0.05)]">
+              <div class="font-display text-base sm:text-lg font-bold" style="color: var(--accent);">D3</div>
+              <div class="text-[10px] sm:text-xs text-[var(--muted)] mt-1">Follow-up #1</div>
             </div>
-            <div class="text-center p-3 rounded-xl border border-[rgba(0,212,255,0.3)] bg-[rgba(0,212,255,0.05)]">
-              <div class="font-display text-lg font-bold" style="color: var(--accent-tertiary);">D7</div>
-              <div class="text-xs text-[var(--muted)] mt-1">Follow-up #2</div>
+            <div class="text-center p-2 sm:p-3 rounded-xl border border-[rgba(0,212,255,0.3)] bg-[rgba(0,212,255,0.05)]">
+              <div class="font-display text-base sm:text-lg font-bold" style="color: var(--accent-tertiary);">D7</div>
+              <div class="text-[10px] sm:text-xs text-[var(--muted)] mt-1">Follow-up #2</div>
             </div>
           </div>
         </div>
 
         <!-- Flow 3 -->
-        <div class="flex gap-6 reveal reveal-delay-4">
+        <div class="flex gap-4 sm:gap-6 reveal reveal-delay-4">
           <div class="flex flex-col items-center">
             <div class="step-number" style="border-color: var(--accent-tertiary); color: var(--accent-tertiary);">3</div>
           </div>
           <div>
-            <h3 class="font-display text-2xl font-bold mb-2">Reply Detection</h3>
-            <p class="text-[var(--muted)] mb-4"><strong class="text-[var(--fg)]">Runs every 2 hours on weekdays.</strong> Searches Gmail for replies from active leads, filters out your own sent emails to avoid false positives, marks the lead as "replied", stops the sequence, and sends a Telegram alert with the reply preview.</p>
-            <div class="flex flex-wrap gap-2">
+            <h3 class="font-display text-xl sm:text-2xl font-bold mb-2">Reply Detection</h3>
+            <p class="text-[var(--muted)] mb-3 sm:mb-4 text-sm sm:text-base"><strong class="text-[var(--fg)]">Runs every 2 hours on weekdays.</strong> Searches Gmail for replies from active leads, filters out your own sent emails to avoid false positives, marks the lead as "replied", stops the sequence, and sends a Telegram alert with the reply preview.</p>
+            <div class="flex flex-wrap gap-1.5 sm:gap-2">
               <span class="tag-cyan">Gmail Search</span>
               <span class="tag-pink">Logic Filter</span>
               <span class="tag-green">Telegram Alert</span>
@@ -478,15 +792,14 @@
           </div>
         </div>
 
-        <!-- Final Nodes -->
-        <div class="max-w-md ml-16 mt-8 reveal reveal-delay-5">
-          <div class="node node-pulse">
+        <div class="max-w-sm sm:max-w-md ml-10 sm:ml-16 mt-6 sm:mt-8 reveal reveal-delay-5">
+          <div class="node node-pulse touch-ripple-container">
             <div class="node-icon bg-gradient-to-br from-[var(--accent)] to-[var(--accent-tertiary)]">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
             </div>
             <div>
-              <div class="font-display text-sm font-bold">Reply Detected!</div>
-              <div class="text-xs text-[var(--muted)]">→ Telegram Alert + Update Sheet</div>
+              <div class="font-display text-xs sm:text-sm font-bold">Reply Detected!</div>
+              <div class="text-[10px] sm:text-xs text-[var(--muted)]">→ Telegram Alert + Update Sheet</div>
             </div>
           </div>
         </div>
@@ -494,134 +807,128 @@
     </div>
   </section>
 
-  <!-- Tech Stack Used -->
-  <section class="relative z-10 py-24 bg-[var(--bg-elevated)]">
-    <div class="max-w-7xl mx-auto px-6">
-      <div class="text-center mb-16">
+  <!-- Tech Stack -->
+  <section class="relative z-10 py-16 sm:py-24 bg-[var(--bg-elevated)]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+      <div class="text-center mb-10 sm:mb-16">
         <span class="section-label-cyan reveal">Stack</span>
-        <h2 class="font-display text-4xl md:text-5xl font-bold mt-6 reveal reveal-delay-1">
-          Tools <span class="text-[var(--muted)]">Powering This</span>
-        </h2>
+        <h2 class="font-display text-2xl sm:text-4xl md:text-5xl font-bold mt-4 sm:mt-6 reveal reveal-delay-1">Tools <span class="text-[var(--muted)]">Powering This</span></h2>
       </div>
-      <div class="grid grid-cols-2 md:grid-cols-5 gap-4 max-w-4xl mx-auto">
-        <div class="feature-card p-6 text-center reveal">
-          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--accent-secondary)] to-[var(--accent)] flex items-center justify-center mx-auto mb-3">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4 max-w-4xl mx-auto">
+        <div class="feature-card p-4 sm:p-6 text-center reveal touch-ripple-container">
+          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-[var(--accent-secondary)] to-[var(--accent)] flex items-center justify-center mx-auto mb-2 sm:mb-3">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
           </div>
-          <div class="font-display font-bold text-sm">n8n</div>
-          <div class="text-xs text-[var(--muted)] mt-1">Orchestration</div>
+          <div class="font-display font-bold text-xs sm:text-sm">n8n</div>
+          <div class="text-[10px] sm:text-xs text-[var(--muted)] mt-1">Orchestration</div>
         </div>
-        <div class="feature-card p-6 text-center reveal reveal-delay-1">
-          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--accent)] to-[var(--accent-tertiary)] flex items-center justify-center mx-auto mb-3">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6m11-7h-6m-6 0H1"/></svg>
+        <div class="feature-card p-4 sm:p-6 text-center reveal reveal-delay-1 touch-ripple-container">
+          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-[var(--accent)] to-[var(--accent-tertiary)] flex items-center justify-center mx-auto mb-2 sm:mb-3">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6m11-7h-6m-6 0H1"/></svg>
           </div>
-          <div class="font-display font-bold text-sm">Ollama</div>
-          <div class="text-xs text-[var(--muted)] mt-1">Local LLM</div>
+          <div class="font-display font-bold text-xs sm:text-sm">Ollama</div>
+          <div class="text-[10px] sm:text-xs text-[var(--muted)] mt-1">Local LLM</div>
         </div>
-        <div class="feature-card p-6 text-center reveal reveal-delay-2">
-          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--accent-tertiary)] to-[var(--accent-secondary)] flex items-center justify-center mx-auto mb-3">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <div class="feature-card p-4 sm:p-6 text-center reveal reveal-delay-2 touch-ripple-container">
+          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-[var(--accent-tertiary)] to-[var(--accent-secondary)] flex items-center justify-center mx-auto mb-2 sm:mb-3">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
           </div>
-          <div class="font-display font-bold text-sm">Gmail</div>
-          <div class="text-xs text-[var(--muted)] mt-1">Transport</div>
+          <div class="font-display font-bold text-xs sm:text-sm">Gmail</div>
+          <div class="text-[10px] sm:text-xs text-[var(--muted)] mt-1">Transport</div>
         </div>
-        <div class="feature-card p-6 text-center reveal reveal-delay-3">
-          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--accent)] to-[var(--accent-secondary)] flex items-center justify-center mx-auto mb-3">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9"9"/></svg>
+        <div class="feature-card p-4 sm:p-6 text-center reveal reveal-delay-3 touch-ripple-container">
+          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-[var(--accent)] to-[var(--accent-secondary)] flex items-center justify-center mx-auto mb-2 sm:mb-3">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
           </div>
-          <div class="font-display font-bold text-sm">Google Sheets</div>
-          <div class="text-xs text-[var(--muted)] mt-1">Database</div>
+          <div class="font-display font-bold text-xs sm:text-sm">Google Sheets</div>
+          <div class="text-[10px] sm:text-xs text-[var(--muted)] mt-1">Database</div>
         </div>
-        <div class="feature-card p-6 text-center reveal reveal-delay-4">
-          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--accent-tertiary)] to-[var(--accent)] flex items-center justify-center mx-auto mb-3">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <div class="feature-card p-4 sm:p-6 text-center reveal reveal-delay-4 touch-ripple-container sm:col-span-1 col-span-2">
+          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-[var(--accent-tertiary)] to-[var(--accent)] flex items-center justify-center mx-auto mb-2 sm:mb-3">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           </div>
-          <div class="font-display font-bold text-sm">Telegram</div>
-          <div class="text-xs text-[var(--muted)] mt-1">Alerts</div>
+          <div class="font-display font-bold text-xs sm:text-sm">Telegram</div>
+          <div class="text-[10px] sm:text-xs text-[var(--muted)] mt-1">Alerts</div>
         </div>
       </div>
     </div>
   </section>
 
   <!-- Setup Steps -->
-  <section class="relative z-10 py-32">
-    <div class="max-w-7xl mx-auto px-6">
-      <div class="text-center mb-16">
+  <section class="relative z-10 py-16 sm:py-24 md:py-32">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+      <div class="text-center mb-10 sm:mb-16">
         <span class="section-label reveal">Implementation</span>
-        <h2 class="font-display text-5xl md:text-6xl font-bold mt-6 reveal reveal-delay-1">
-          Setup <span class="text-shimmer-secondary">Steps</span>
-        </h2>
+        <h2 class="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mt-4 sm:mt-6 reveal reveal-delay-1">Setup <span class="text-shimmer-secondary">Steps</span></h2>
       </div>
-      <div class="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-        <div class="workflow-card reveal">
-          <div class="relative z-10 p-8">
-            <div class="w-10 h-10 rounded-full bg-[rgba(0,255,136,0.15)] flex items-center justify-center mb-4 text-[var(--accent)] font-display font-bold">1</div>
-            <h3 class="font-display text-xl font-bold mb-3">Google Sheets Config</h3>
-            <p class="text-[var(--muted)] text-sm">Create a spreadsheet with columns: Lead Name, Email, Company, Website, Role, Status, Reply tracking columns (see workflow notes).</p>
+      <div class="grid sm:grid-cols-2 gap-3 sm:gap-6 max-w-4xl mx-auto">
+        <div class="workflow-card reveal touch-ripple-container">
+          <div class="relative z-10 p-5 sm:p-6 md:p-8">
+            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[rgba(0,255,136,0.15)] flex items-center justify-center mb-3 sm:mb-4 text-[var(--accent)] font-display font-bold text-sm sm:text-base">1</div>
+            <h3 class="font-display text-lg sm:text-xl font-bold mb-2 sm:mb-3">Google Sheets Config</h3>
+            <p class="text-[var(--muted)] text-xs sm:text-sm">Create a spreadsheet with columns: Lead Name, Email, Company, Website, Role, Status, Reply tracking columns.</p>
           </div>
         </div>
-        <div class="workflow-card reveal reveal-delay-1">
-          <div class="relative z-10 p-8">
-            <div class="w-10 h-10 rounded-full bg-[rgba(255,0,110,0.15)] flex items-center justify-center mb-4 text-[var(--accent-secondary)] font-display font-bold">2</div>
-            <h3 class="font-display text-xl font-bold mb-3">OAuth2 Connections</h3>
-            <p class="text-[var(--muted)] text-sm">Connect your Gmail for sending/searching and Google Sheets for reading/writing lead data.</p>
+        <div class="workflow-card reveal reveal-delay-1 touch-ripple-container">
+          <div class="relative z-10 p-5 sm:p-6 md:p-8">
+            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[rgba(255,0,110,0.15)] flex items-center justify-center mb-3 sm:mb-4 text-[var(--accent-secondary)] font-display font-bold text-sm sm:text-base">2</div>
+            <h3 class="font-display text-lg sm:text-xl font-bold mb-2 sm:mb-3">OAuth2 Connections</h3>
+            <p class="text-[var(--muted)] text-xs sm:text-sm">Connect your Gmail for sending/searching and Google Sheets for reading/writing lead data.</p>
           </div>
         </div>
-        <div class="workflow-card reveal reveal-delay-2">
-          <div class="relative z-10 p-8">
-            <div class="w-10 h-10 rounded-full bg-[rgba(0,212,255,0.15)] flex items-center justify-center mb-4 text-[var(--accent-tertiary)] font-display font-bold">3</div>
-            <h3 class="font-display text-xl font-bold mb-3">Ollama Installation</h3>
-            <p class="text-[var(--muted)] text-sm">Install locally and pull a model (e.g., <code class="text-xs bg-[var(--bg)] px-1.5 py-0.5 rounded">ollama pull mistral</code>). Swap for OpenAI/Anthropic if preferred.</p>
+        <div class="workflow-card reveal reveal-delay-2 touch-ripple-container">
+          <div class="relative z-10 p-5 sm:p-6 md:p-8">
+            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[rgba(0,212,255,0.15)] flex items-center justify-center mb-3 sm:mb-4 text-[var(--accent-tertiary)] font-display font-bold text-sm sm:text-base">3</div>
+            <h3 class="font-display text-lg sm:text-xl font-bold mb-2 sm:mb-3">Ollama Installation</h3>
+            <p class="text-[var(--muted)] text-xs sm:text-sm">Install locally and pull a model (e.g., <code class="text-[10px] sm:text-xs bg-[var(--bg)] px-1.5 py-0.5 rounded">ollama pull mistral</code>). Swap for OpenAI/Anthropic if preferred.</p>
           </div>
         </div>
-        <div class="workflow-card reveal reveal-delay-3">
-          <div class="relative z-10 p-8">
-            <div class="w-10 h-10 rounded-full bg-[rgba(0,255,136,0.15)] flex items-center justify-center mb-4 text-[var(--accent)] font-display font-bold">4</div>
-            <h3 class="font-display text-xl font-bold mb-3">Telegram Bot</h3>
-            <p class="text-[var(--muted)] text-sm">Create a bot via @BotFather, grab your token and chat ID for real-time reply notifications.</p>
+        <div class="workflow-card reveal reveal-delay-3 touch-ripple-container">
+          <div class="relative z-10 p-5 sm:p-6 md:p-8">
+            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[rgba(0,255,136,0.15)] flex items-center justify-center mb-3 sm:mb-4 text-[var(--accent)] font-display font-bold text-sm sm:text-base">4</div>
+            <h3 class="font-display text-lg sm:text-xl font-bold mb-2 sm:mb-3">Telegram Bot</h3>
+            <p class="text-[var(--muted)] text-xs sm:text-sm">Create a bot via @BotFather, grab your token and chat ID for real-time reply notifications.</p>
           </div>
         </div>
-        <div class="workflow-card reveal reveal-delay-4">
-          <div class="relative z-10 p-8">
-            <div class="w-10 h-10 rounded-full bg-[rgba(255,0,110,0.15)] flex items-center justify-center mb-4 text-[var(--accent-secondary)] font-display font-bold">5</div>
-            <h3 class="font-display text-xl font-bold mb-3">Prompt Customization</h3>
-            <p class="text-[var(--muted)] text-sm">Edit the AI Lead Scorer and Email Writer system prompts with your ICP, product details, and specific results.</p>
+        <div class="workflow-card reveal reveal-delay-4 touch-ripple-container">
+          <div class="relative z-10 p-5 sm:p-6 md:p-8">
+            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[rgba(255,0,110,0.15)] flex items-center justify-center mb-3 sm:mb-4 text-[var(--accent-secondary)] font-display font-bold text-sm sm:text-base">5</div>
+            <h3 class="font-display text-lg sm:text-xl font-bold mb-2 sm:mb-3">Prompt Customization</h3>
+            <p class="text-[var(--muted)] text-xs sm:text-sm">Edit the AI Lead Scorer and Email Writer system prompts with your ICP, product details, and specific results.</p>
           </div>
         </div>
-        <div class="workflow-card reveal reveal-delay-5">
-          <div class="relative z-10 p-8">
-            <div class="w-10 h-10 rounded-full bg-[rgba(0,212,255,0.15)] flex items-center justify-center mb-4 text-[var(--accent-tertiary)] font-display font-bold">6</div>
-            <h3 class="font-display text-xl font-bold mb-3">Test & Activate</h3>
-            <p class="text-[var(--muted)] text-sm">Add a test lead with status "new", run the research flow manually, verify emails generate correctly, then enable all schedules.</p>
+        <div class="workflow-card reveal reveal-delay-5 touch-ripple-container">
+          <div class="relative z-10 p-5 sm:p-6 md:p-8">
+            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[rgba(0,212,255,0.15)] flex items-center justify-center mb-3 sm:mb-4 text-[var(--accent-tertiary)] font-display font-bold text-sm sm:text-base">6</div>
+            <h3 class="font-display text-lg sm:text-xl font-bold mb-2 sm:mb-3">Test & Activate</h3>
+            <p class="text-[var(--muted)] text-xs sm:text-sm">Add a test lead with status "new", run the research flow manually, verify emails generate correctly, then enable all schedules.</p>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- CTA Section -->
-  <section class="relative z-10 py-32 bg-[var(--bg-elevated)]">
-    <div class="max-w-7xl mx-auto px-6">
+  <!-- CTA -->
+  <section class="relative z-10 py-16 sm:py-24 md:py-32 bg-[var(--bg-elevated)]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6">
       <div class="max-w-3xl mx-auto text-center">
         <span class="section-label-pink reveal">Ready?</span>
-        <h2 class="font-display text-5xl md:text-7xl font-bold mt-8 leading-tight reveal reveal-delay-1">
+        <h2 class="font-display text-3xl sm:text-5xl md:text-7xl font-bold mt-5 sm:mt-8 leading-tight reveal reveal-delay-1">
           Get This<br><span class="text-shimmer-secondary">Workflow Template</span>
         </h2>
-        <p class="text-xl text-[var(--muted)] mt-6 max-w-xl mx-auto reveal reveal-delay-2">
+        <p class="text-base sm:text-lg md:text-xl text-[var(--muted)] mt-4 sm:mt-6 max-w-xl mx-auto reveal reveal-delay-2">
           Self-hosted, private, and infinitely customizable. Let me help you deploy this for your outreach.
         </p>
-        <div class="flex flex-wrap justify-center gap-4 mt-10 reveal reveal-delay-3">
-          <a href="index.html#contact" class="btn-pink magnetic-target">
+        <div class="flex flex-col sm:flex-row flex-wrap justify-center gap-3 sm:gap-4 mt-6 sm:mt-10 reveal reveal-delay-3">
+          <a href="index.html#contact" class="btn-pink magnetic-target touch-ripple-container">
             Get the Template
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
           </a>
-          <a href="index.html#case-studies" class="btn-secondary magnetic-target">
+          <a href="n8n-case-study.html" class="btn-secondary magnetic-target touch-ripple-container">
             View More Projects
           </a>
         </div>
-
-        <!-- Data Flow -->
-        <div class="data-flow-container mt-16 reveal reveal-delay-4">
+        <div class="data-flow-container mt-10 sm:mt-16 reveal reveal-delay-4">
           <div class="data-flow"></div>
         </div>
       </div>
@@ -629,22 +936,18 @@
   </section>
 
   <!-- Footer -->
-  <footer class="relative z-10 py-8 border-t border-[var(--border)]">
-    <div class="max-w-7xl mx-auto px-6">
-      <div class="flex flex-col md:flex-row items-center justify-between gap-4">
-        <div class="flex items-center gap-2 text-[var(--muted)] text-sm">
+  <footer class="relative z-10 py-5 sm:py-8 border-t border-[var(--border)]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div class="flex items-center gap-2 text-[var(--muted)] text-[10px] sm:text-sm">
           <span>Designed & Built by</span>
           <span class="font-display font-bold text-[var(--fg)]">Tony Adijah</span>
         </div>
-        <div class="flex items-center gap-4">
-          <a href="https://www.linkedin.com/in/tony-adijah-965903131/" target="_blank" rel="noopener noreferrer" class="text-[var(--muted)] hover:text-[var(--accent)] transition-colors magnetic-target" aria-label="LinkedIn">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
-              <rect x="2" y="9" width="4" height="12"/>
-              <circle cx="4" cy="4" r="2"/>
-            </svg>
+        <div class="flex items-center gap-3">
+          <a href="https://www.linkedin.com/in/tony-adijah-965903131/" target="_blank" rel="noopener noreferrer" class="text-[var(--muted)] magnetic-target" aria-label="LinkedIn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
           </a>
-          <span class="text-sm text-[var(--muted)]">&copy; 2026 All rights reserved.</span>
+          <span class="text-[10px] sm:text-sm text-[var(--muted)]">&copy; 2026 All rights reserved.</span>
         </div>
       </div>
     </div>
@@ -653,18 +956,90 @@
   <script>
     document.addEventListener('DOMContentLoaded', function() {
 
-      // ===== CUSTOM CURSOR =====
+      // ===== MOBILE MENU =====
+      var menuBtn = document.getElementById('mobile-menu-btn');
+      var mobileMenu = document.getElementById('mobile-menu');
+      var scrollPos = 0;
+
+      function openMenu() {
+        scrollPos = window.pageYOffset || document.documentElement.scrollTop;
+        menuBtn.classList.add('active');
+        menuBtn.setAttribute('aria-expanded', 'true');
+        mobileMenu.classList.add('active');
+        document.body.classList.add('menu-open');
+        document.body.style.top = '-' + scrollPos + 'px';
+      }
+      function closeMenu() {
+        menuBtn.classList.remove('active');
+        menuBtn.setAttribute('aria-expanded', 'false');
+        mobileMenu.classList.remove('active');
+        document.body.classList.remove('menu-open');
+        document.body.style.top = '';
+        window.scrollTo(0, scrollPos);
+      }
+      if (menuBtn && mobileMenu) {
+        menuBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          if (mobileMenu.classList.contains('active')) { closeMenu(); } else { openMenu(); }
+        });
+        mobileMenu.querySelectorAll('a').forEach(function(l) { l.addEventListener('click', function() { closeMenu(); }); });
+        mobileMenu.addEventListener('click', function(e) { if (e.target === mobileMenu) closeMenu(); });
+        document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && mobileMenu.classList.contains('active')) closeMenu(); });
+      }
+
+      // ===== TOUCH DETECTION =====
+      var isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+      var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var touchGlow = document.getElementById('touch-glow');
+
+      // ===== TOUCH EFFECTS =====
+      if (isTouchDevice) {
+        function createRipple(element, e) {
+          var rect = element.getBoundingClientRect();
+          var touch = e.touches ? e.touches[0] : e;
+          var x = touch.clientX - rect.left;
+          var y = touch.clientY - rect.top;
+          var size = Math.max(rect.width, rect.height);
+          var ripple = document.createElement('div');
+          ripple.className = 'touch-ripple';
+          if (element.classList.contains('btn-pink') || element.classList.contains('btn-primary')) {
+            ripple.className = 'touch-ripple ripple-white';
+          } else if (element.classList.contains('feature-card') || element.classList.contains('stat-card')) {
+            ripple.className = 'touch-ripple ripple-green';
+          }
+          ripple.style.width = size + 'px';
+          ripple.style.height = size + 'px';
+          ripple.style.left = (x - size / 2) + 'px';
+          ripple.style.top = (y - size / 2) + 'px';
+          element.appendChild(ripple);
+          if (touchGlow) {
+            touchGlow.style.left = touch.clientX + 'px';
+            touchGlow.style.top = touch.clientY + 'px';
+            touchGlow.classList.add('active');
+            setTimeout(function() { touchGlow.classList.remove('active'); }, 400);
+          }
+          ripple.addEventListener('animationend', function() { ripple.remove(); });
+          setTimeout(function() { if (ripple.parentNode) ripple.remove(); }, 700);
+        }
+
+        document.querySelectorAll('.touch-ripple-container').forEach(function(el) {
+          el.addEventListener('touchstart', function(e) { createRipple(el, e); }, { passive: true });
+        });
+      }
+
+      // ===== CUSTOM CURSOR (Desktop) =====
       var dot = document.getElementById('cursor-dot');
       var ring = document.getElementById('cursor-ring');
       var glow = document.getElementById('cursor-glow');
       var trails = [];
       for (var t = 1; t <= 5; t++) { trails.push(document.getElementById('trail-' + t)); }
 
-      var isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-      var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      var cursorEnabled = !isTouchDevice && !prefersReducedMotion;
+      var cursorEnabled = !isTouchDevice && !prefersReducedMotion && window.matchMedia('(hover:hover) and (pointer:fine)').matches;
 
       if (cursorEnabled && dot && ring && glow) {
+        dot.style.display = 'block'; ring.style.display = 'block'; glow.style.display = 'block';
+        trails.forEach(function(r) { if (r) r.style.display = 'block'; });
+
         var mouseX = 0, mouseY = 0, dotX = 0, dotY = 0, ringX = 0, ringY = 0, glowX = 0, glowY = 0;
         var trailPositions = [], isMoving = false, moveTimeout;
         for (var i = 0; i < trails.length; i++) { trailPositions.push({ x: 0, y: 0 }); }
@@ -675,17 +1050,21 @@
         });
 
         document.addEventListener('click', function(e) {
+          var x = e.clientX, y = e.clientY;
           for (var i = 0; i < 8; i++) {
             var p = document.createElement('div');
             p.style.cssText = 'position:fixed;width:4px;height:4px;border-radius:50%;pointer-events:none;z-index:99999;';
             var c = ['#00ff88','#ff006e','#00d4ff']; p.style.background = c[Math.floor(Math.random()*c.length)];
-            p.style.left = e.clientX+'px'; p.style.top = e.clientY+'px';
+            p.style.left = x+'px'; p.style.top = y+'px';
             p.style.boxShadow = '0 0 6px '+p.style.background; document.body.appendChild(p);
             var a = (Math.PI*2/8)*i+(Math.random()*0.5), v = 60+Math.random()*40;
-            var tx = e.clientX+Math.cos(a)*v, ty = e.clientY+Math.sin(a)*v;
-            (function(el,sx,sy,ex,ey){ var st=Date.now(); function tk(){ var el2=Date.now()-st,pr=Math.min(el2/600,1),ea=1-Math.pow(1-pr,3);
-            el.style.left=sx+(ex-sx)*ea+'px';el.style.top=sy+(ey-sy)*ea+'px';el.style.opacity=1-pr;el.style.transform='scale('+(1-pr*0.5)+')';
-            if(pr<1){requestAnimationFrame(tk)}else{el.remove()}}requestAnimationFrame(tk)})(p,e.clientX,e.clientY,tx,ty);
+            (function(el,sx,sy,ex,ey){
+              var st=Date.now(),d=600;
+              function tk(){var e2=Date.now()-st,pr=Math.min(e2/d,1),ea=1-Math.pow(1-pr,3);
+              el.style.left=sx+(ex-sx)*ea+'px';el.style.top=sy+(ey-sy)*ea+'px';
+              el.style.opacity=1-pr;el.style.transform='scale('+(1-pr*0.5)+')';
+              if(pr<1)requestAnimationFrame(tk);else el.remove();}requestAnimationFrame(tk);
+            })(p,x,y,x+Math.cos(a)*v,y+Math.sin(a)*v);
           }
         });
 
@@ -693,13 +1072,21 @@
           dotX+=(mouseX-dotX)*0.35; dotY+=(mouseY-dotY)*0.35; dot.style.left=dotX+'px'; dot.style.top=dotY+'px';
           ringX+=(mouseX-ringX)*0.15; ringY+=(mouseY-ringY)*0.15; ring.style.left=ringX+'px'; ring.style.top=ringY+'px';
           glowX+=(mouseX-glowX)*0.08; glowY+=(mouseY-glowY)*0.08; glow.style.left=glowX+'px'; glow.style.top=glowY+'px';
-          for(var i=0;i<trails.length;i++){var tg=i===0?{x:dotX,y:dotY}:trailPositions[i-1];var sp=0.2-(i*0.03);
-          trailPositions[i].x+=(tg.x-trailPositions[i].x)*sp;trailPositions[i].y+=(tg.y-trailPositions[i].y)*sp;
-          trails[i].style.left=trailPositions[i].x+'px';trails[i].style.top=trailPositions[i].y+'px';
-          if(isMoving){var to=0.4-(i*0.07),ts=5-i;trails[i].style.opacity=to;trails[i].style.width=ts+'px';trails[i].style.height=ts+'px';
-          trails[i].style.background=i%2===0?'rgba(0,255,136,0.6)':'rgba(0,212,255,0.6)';trails[i].style.boxShadow='0 0 '+(ts+2)+'px '+trails[i].style.background;}
-          else{trails[i].style.opacity=0;}}
+
+          for(var i=0;i<trails.length;i++){
+            var tg=i===0?{x:dotX,y:dotY}:trailPositions[i-1];var sp=0.2-(i*0.03);
+            trailPositions[i].x+=(tg.x-trailPositions[i].x)*sp;
+            trailPositions[i].y+=(tg.y-trailPositions[i].y)*sp;
+            trails[i].style.left=trailPositions[i].x+'px';trails[i].style.top=trailPositions[i].y+'px';
+            if(isMoving){var to=0.4-(i*0.07),ts=5-i;
+            trails[i].style.opacity=to;trails[i].style.width=ts+'px';trails[i].style.height=ts+'px';
+            trails[i].style.background=i%2===0?'rgba(0,255,136,0.6)':'rgba(0,212,255,0.6)';
+            trails[i].style.boxShadow='0 0 '+(ts+2)+'px '+trails[i].style.background;}
+            else{trails[i].style.opacity=0;}
+          }
+
           var dx=mouseX-ringX,dy=mouseY-ringY,spd=Math.sqrt(dx*dx+dy*dy),sk=Math.min(spd*0.3,15),ag=Math.atan2(dy,dx)*(180/Math.PI);
+          ring.style.webkitTransform='translate(-50%,-50%) rotate('+ag+'deg) scaleX('+(1+sk*0.01)+')';
           ring.style.transform='translate(-50%,-50%) rotate('+ag+'deg) scaleX('+(1+sk*0.01)+')';
           requestAnimationFrame(animate);
         }
@@ -711,28 +1098,47 @@
         });
 
         document.querySelectorAll('.magnetic-target').forEach(function(el){
-          el.addEventListener('mousemove',function(e){var r=el.getBoundingClientRect();var cx=r.left+r.width/2,cy=r.top+r.height/2;
-          el.style.transform='translate('+((e.clientX-cx)*0.2)+'px,'+((e.clientY-cy)*0.2)+'px)';});
-          el.addEventListener('mouseleave',function(){el.style.transform='';});
+          el.addEventListener('mousemove',function(e){
+            var r=el.getBoundingClientRect();
+            el.style.webkitTransform='translate('+((e.clientX-r.left-r.width/2)*0.2)+'px,'+((e.clientY-r.top-r.height/2)*0.2)+'px)';
+            el.style.transform='translate('+((e.clientX-r.left-r.width/2)*0.2)+'px,'+((e.clientY-r.top-r.height/2)*0.2)+'px)';
+          });
+          el.addEventListener('mouseleave',function(){el.style.webkitTransform='';el.style.transform='';});
         });
 
         document.addEventListener('mouseleave',function(){dot.classList.add('cursor-hidden');ring.classList.add('cursor-hidden');glow.style.opacity='0';});
         document.addEventListener('mouseenter',function(){dot.classList.remove('cursor-hidden');ring.classList.remove('cursor-hidden');glow.style.opacity='1';});
-      } else {
-        if(dot)dot.style.display='none';if(ring)ring.style.display='none';if(glow)glow.style.display='none';
-        trails.forEach(function(t){if(t)t.style.display='none';});
-        document.querySelectorAll('*').forEach(function(el){el.style.cursor='auto';});
       }
 
-      // ===== SCROLL REVEAL =====
+      // ===== SCROLL REVEAL (Safari-compatible) =====
       var reveals = document.querySelectorAll('.reveal');
-      var obs = new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);}});},{rootMargin:'0px 0px -80px 0px',threshold:0.1});
-      reveals.forEach(function(el){obs.observe(el);});
+      if ('IntersectionObserver' in window) {
+        var obs = new IntersectionObserver(function(entries) {
+          entries.forEach(function(e) {
+            if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
+          });
+        }, { root: null, rootMargin: '0px 0px -50px 0px', threshold: 0.05 });
+        reveals.forEach(function(el) { obs.observe(el); });
+      } else {
+        reveals.forEach(function(el) { el.classList.add('visible'); });
+      }
 
-      // ===== SMOOTH SCROLL =====
-      document.querySelectorAll('a[href^="#"]').forEach(function(a){a.addEventListener('click',function(e){
-        var id=this.getAttribute('href');if(id==='#')return;var t=document.querySelector(id);
-        if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'});}});
+      // ===== SMOOTH SCROLL (Safari fallback) =====
+      document.querySelectorAll('a[href^="#"]').forEach(function(a) {
+        a.addEventListener('click', function(e) {
+          var id = this.getAttribute('href');
+          if (id === '#') return;
+          var tgt = document.querySelector(id);
+          if (tgt) {
+            e.preventDefault();
+            if ('scrollBehavior' in document.documentElement.style) {
+              tgt.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else {
+              var y = tgt.getBoundingClientRect().top + window.pageYOffset - 80;
+              window.scrollTo(0, y);
+            }
+          }
+        });
       });
     });
   </script>
