@@ -1,24 +1,35 @@
 /* ============================================
    TONY ADIJAH — PORTFOLIO JS
-   v4.0 — Smooth desktop reveal + iOS fix
+   v5.0 — Bulletproof animations
    ============================================ */
 
 (function () {
   'use strict';
 
+  /* ===== DEVICE DETECTION ===== */
   var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   var isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
+  /* ===== INIT ===== */
+  // Try to run ASAP
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    setTimeout(startApp, 0);
   } else {
-    init();
+    document.addEventListener('DOMContentLoaded', startApp);
   }
 
-  function init() {
+  // Also run on window load as backup
+  window.addEventListener('load', function () {
+    revealVisible();
+  });
+
+  function startApp() {
+    // Debug: confirm script is running
+    console.log('✅ Portfolio script loaded successfully');
+
     initMobileMenu();
-    initScrollReveal();
+    initRevealAnimations();
     initSmoothScroll();
     initContactForm();
     initCursor();
@@ -50,62 +61,73 @@
         document.body.style.width = '';
       });
     }
+
+    console.log('✅ Mobile menu ready');
   }
 
-  /* ===== SCROLL REVEAL — FIXED FOR DESKTOP ===== */
-  function initScrollReveal() {
-    var elements = document.querySelectorAll('.reveal');
-    if (!elements.length) return;
-
-    // ★ STEP 1: Immediately reveal anything already in viewport
-    // This runs BEFORE IntersectionObserver even starts
+  /* ===== REVEAL ANIMATIONS ===== */
+  function initRevealAnimations() {
+    // ★ STEP 1: Immediately reveal elements in viewport
     revealVisible();
 
-    // ★ STEP 2: Set up IntersectionObserver for elements below the fold
-    if ('IntersectionObserver' in window) {
-      var observer = new IntersectionObserver(
-        function (entries) {
-          for (var i = 0; i < entries.length; i++) {
-            if (entries[i].isIntersecting) {
-              entries[i].target.classList.add('visible');
-              observer.unobserve(entries[i].target);
-            }
-          }
-        },
-        {
-          root: null,
-          // ★ Large top margin catches elements already visible
-          rootMargin: '100px 0px -10px 0px',
-          threshold: 0.01,
-        }
-      );
+    // ★ STEP 2: Set up observer for below-fold elements
+    setupObserver();
 
-      // Only observe elements NOT already visible
-      for (var i = 0; i < elements.length; i++) {
-        if (!elements[i].classList.contains('visible')) {
-          observer.observe(elements[i]);
-        }
-      }
-    } else {
-      // No IntersectionObserver — show everything
-      for (var j = 0; j < elements.length; j++) {
-        elements[j].classList.add('visible');
-      }
-    }
-
-    // ★ STEP 3: Re-check after short delays (fonts, images loading can shift layout)
+    // ★ STEP 3: Multiple timed checks (catches edge cases)
     setTimeout(revealVisible, 50);
-    setTimeout(revealVisible, 150);
-    setTimeout(revealVisible, 400);
+    setTimeout(revealVisible, 200);
+    setTimeout(revealVisible, 500);
+    setTimeout(revealVisible, 1000);
+    setTimeout(revealVisible, 2000);
 
-    // ★ STEP 4: Re-check when page fully loads
-    window.addEventListener('load', function () {
-      revealVisible();
-      setTimeout(revealVisible, 200);
-    });
+    // ★ STEP 4: Check on scroll
+    var ticking = false;
+    window.addEventListener('scroll', function () {
+      if (!ticking) {
+        requestAnimationFrame(function () {
+          revealVisible();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    }, { passive: true });
+
+    // ★ STEP 5: Check on resize
+    window.addEventListener('resize', function () {
+      setTimeout(revealVisible, 100);
+    }, { passive: true });
+
+    console.log('✅ Reveal animations ready');
   }
 
-  // ★ Core function: Find and reveal all elements currently in viewport
+  function setupObserver() {
+    var elements = document.querySelectorAll('.reveal:not(.visible)');
+    if (!elements.length) return;
+
+    if ('IntersectionObserver' in window) {
+      var observer = new IntersectionObserver(function (entries) {
+        for (var i = 0; i < entries.length; i++) {
+          if (entries[i].isIntersecting) {
+            entries[i].target.classList.add('visible');
+            observer.unobserve(entries[i].target);
+          }
+        }
+      }, {
+        root: null,
+        rootMargin: '200px 0px 0px 0px',
+        threshold: 0
+      });
+
+      for (var i = 0; i < elements.length; i++) {
+        observer.observe(elements[i]);
+      }
+    } else {
+      // No IntersectionObserver support — show everything
+      showAll();
+    }
+  }
+
+  // ★ Core: reveal elements currently in viewport
   function revealVisible() {
     var elements = document.querySelectorAll('.reveal:not(.visible)');
     if (!elements.length) return;
@@ -115,30 +137,20 @@
     for (var i = 0; i < elements.length; i++) {
       var rect = elements[i].getBoundingClientRect();
 
-      // Element is visible if ANY part of it is on screen
-      // Added generous 100px buffer
-      if (rect.top < vh + 100 && rect.bottom > -100) {
+      if (rect.top < vh + 150 && rect.bottom > -150) {
         elements[i].classList.add('visible');
       }
     }
   }
 
-  // ★ Backup: check on scroll (throttled)
-  var scrollRAF;
-  window.addEventListener('scroll', function () {
-    if (scrollRAF) return;
-    scrollRAF = requestAnimationFrame(function () {
-      revealVisible();
-      scrollRAF = null;
-    });
-  }, { passive: true });
-
-  // ★ Backup: check on resize
-  var resizeTimer;
-  window.addEventListener('resize', function () {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(revealVisible, 150);
-  }, { passive: true });
+  // Fallback: show everything
+  function showAll() {
+    var elements = document.querySelectorAll('.reveal');
+    for (var i = 0; i < elements.length; i++) {
+      elements[i].classList.add('visible');
+    }
+    console.log('✅ All elements revealed (fallback)');
+  }
 
   /* ===== SMOOTH SCROLL ===== */
   function initSmoothScroll() {
@@ -155,12 +167,10 @@
         e.preventDefault();
         var targetY = target.getBoundingClientRect().top + window.pageYOffset - 80;
 
-        if (isIOS) {
+        if (isIOS || !('scrollBehavior' in document.documentElement.style)) {
           smoothScrollTo(targetY, 600);
-        } else if ('scrollBehavior' in document.documentElement.style) {
-          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
         } else {
-          smoothScrollTo(targetY, 600);
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
       });
     }
@@ -214,7 +224,7 @@
     });
   }
 
-  /* ===== CUSTOM CURSOR (Desktop Only) ===== */
+  /* ===== CUSTOM CURSOR ===== */
   function initCursor() {
     if (isTouchDevice || isIOS) return;
 
@@ -229,8 +239,8 @@
 
     var trails = [];
     for (var t = 1; t <= 5; t++) {
-      var tr = document.getElementById('trail-' + t);
-      if (tr) trails.push(tr);
+      var el = document.getElementById('trail-' + t);
+      if (el) trails.push(el);
     }
 
     dot.style.display = 'block';
@@ -258,18 +268,22 @@
         var p = document.createElement('div');
         p.style.cssText = 'position:fixed;width:4px;height:4px;border-radius:50%;pointer-events:none;z-index:99999;will-change:transform,opacity;';
         var c = cols[Math.floor(Math.random() * cols.length)];
-        p.style.background = c; p.style.left = x + 'px'; p.style.top = y + 'px';
+        p.style.background = c;
+        p.style.left = x + 'px';
+        p.style.top = y + 'px';
         p.style.boxShadow = '0 0 6px ' + c;
         document.body.appendChild(p);
-        var a = (Math.PI * 2 / 8) * i + Math.random() * 0.5, v = 60 + Math.random() * 40;
-        anim(p, x, y, x + Math.cos(a) * v, y + Math.sin(a) * v);
+        var a = (Math.PI * 2 / 8) * i + Math.random() * 0.5;
+        var v = 60 + Math.random() * 40;
+        animParticle(p, x, y, x + Math.cos(a) * v, y + Math.sin(a) * v);
       }
     }
 
-    function anim(el, sx, sy, ex, ey) {
+    function animParticle(el, sx, sy, ex, ey) {
       var st = performance.now(), d = 600;
       function tk(now) {
-        var pr = Math.min((now - st) / d, 1), ea = 1 - Math.pow(1 - pr, 3);
+        var pr = Math.min((now - st) / d, 1);
+        var ea = 1 - Math.pow(1 - pr, 3);
         el.style.left = sx + (ex - sx) * ea + 'px';
         el.style.top = sy + (ey - sy) * ea + 'px';
         el.style.opacity = 1 - pr;
@@ -283,8 +297,10 @@
     function loop() {
       dX += (mX - dX) * 0.35; dY += (mY - dY) * 0.35;
       dot.style.left = dX + 'px'; dot.style.top = dY + 'px';
+
       rX += (mX - rX) * 0.15; rY += (mY - rY) * 0.15;
       ring.style.left = rX + 'px'; ring.style.top = rY + 'px';
+
       gX += (mX - gX) * 0.08; gY += (mY - gY) * 0.08;
       glow.style.left = gX + 'px'; glow.style.top = gY + 'px';
 
@@ -295,6 +311,7 @@
         tp[i].y += (tg.y - tp[i].y) * sp;
         trails[i].style.left = tp[i].x + 'px';
         trails[i].style.top = tp[i].y + 'px';
+
         if (moving) {
           var to = 0.4 - i * 0.07, ts = 5 - i;
           trails[i].style.opacity = to;
@@ -308,28 +325,37 @@
       }
 
       var dx = mX - rX, dy = mY - rY;
-      var sp2 = Math.sqrt(dx * dx + dy * dy);
-      var sk = Math.min(sp2 * 0.3, 15);
-      var an = Math.atan2(dy, dx) * (180 / Math.PI);
-      var rt = 'translate(-50%,-50%) rotate(' + an + 'deg) scaleX(' + (1 + sk * 0.01) + ') translateZ(0)';
-      ring.style.webkitTransform = rt; ring.style.transform = rt;
+      var speed = Math.sqrt(dx * dx + dy * dy);
+      var sk = Math.min(speed * 0.3, 15);
+      var angle = Math.atan2(dy, dx) * (180 / Math.PI);
+      var rt = 'translate(-50%,-50%) rotate(' + angle + 'deg) scaleX(' + (1 + sk * 0.01) + ') translateZ(0)';
+      ring.style.webkitTransform = rt;
+      ring.style.transform = rt;
 
       requestAnimationFrame(loop);
     }
     requestAnimationFrame(loop);
 
+    // Hover effects
     var hEls = document.querySelectorAll('a,button,.service-card,.case-card,.result-card,.cert-card,.social-icon,.tech-item,.btn-primary,.btn-secondary,.magnetic-target');
     for (var h = 0; h < hEls.length; h++) {
       hEls[h].addEventListener('mouseenter', function () { dot.classList.add('cursor-hover'); ring.classList.add('cursor-hover'); });
       hEls[h].addEventListener('mouseleave', function () { dot.classList.remove('cursor-hover'); ring.classList.remove('cursor-hover'); });
     }
 
+    // Text cursor
     var tEls = document.querySelectorAll('input,textarea');
     for (var tt = 0; tt < tEls.length; tt++) {
-      tEls[tt].addEventListener('mouseenter', function () { dot.classList.add('cursor-text'); ring.classList.add('cursor-text'); dot.classList.remove('cursor-hover'); ring.classList.remove('cursor-hover'); });
-      tEls[tt].addEventListener('mouseleave', function () { dot.classList.remove('cursor-text'); ring.classList.remove('cursor-text'); });
+      tEls[tt].addEventListener('mouseenter', function () {
+        dot.classList.add('cursor-text'); ring.classList.add('cursor-text');
+        dot.classList.remove('cursor-hover'); ring.classList.remove('cursor-hover');
+      });
+      tEls[tt].addEventListener('mouseleave', function () {
+        dot.classList.remove('cursor-text'); ring.classList.remove('cursor-text');
+      });
     }
 
+    // Magnetic
     var mEls = document.querySelectorAll('.magnetic-target');
     for (var m = 0; m < mEls.length; m++) {
       mEls[m].addEventListener('mousemove', function (e) {
@@ -337,10 +363,21 @@
         var t = 'translate(' + ((e.clientX - r.left - r.width / 2) * 0.2) + 'px,' + ((e.clientY - r.top - r.height / 2) * 0.2) + 'px)';
         this.style.webkitTransform = t; this.style.transform = t;
       });
-      mEls[m].addEventListener('mouseleave', function () { this.style.webkitTransform = ''; this.style.transform = ''; });
+      mEls[m].addEventListener('mouseleave', function () {
+        this.style.webkitTransform = ''; this.style.transform = '';
+      });
     }
 
-    document.addEventListener('mouseleave', function () { dot.classList.add('cursor-hidden'); ring.classList.add('cursor-hidden'); glow.style.opacity = '0'; });
-    document.addEventListener('mouseenter', function () { dot.classList.remove('cursor-hidden'); ring.classList.remove('cursor-hidden'); glow.style.opacity = '1'; });
+    // Hide/show
+    document.addEventListener('mouseleave', function () {
+      dot.classList.add('cursor-hidden'); ring.classList.add('cursor-hidden');
+      glow.style.opacity = '0';
+    });
+    document.addEventListener('mouseenter', function () {
+      dot.classList.remove('cursor-hidden'); ring.classList.remove('cursor-hidden');
+      glow.style.opacity = '1';
+    });
+
+    console.log('✅ Custom cursor ready');
   }
 })();
