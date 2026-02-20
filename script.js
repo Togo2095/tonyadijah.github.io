@@ -1,7 +1,6 @@
 /* ============================================
    TONY ADIJAH — PORTFOLIO JS
-   Desktop + iPhone 13 / iOS Safari FIXED
-   v3.0 — Hero load fix
+   v4.0 — Smooth desktop reveal + iOS fix
    ============================================ */
 
 (function () {
@@ -11,11 +10,9 @@
     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   var isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
 
-  // Start when DOM is ready
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
-    // DOM already loaded
     init();
   }
 
@@ -38,13 +35,8 @@
       btn.classList.toggle('active');
       document.body.style.overflow = isActive ? 'hidden' : '';
       if (isIOS) {
-        if (isActive) {
-          document.body.style.position = 'fixed';
-          document.body.style.width = '100%';
-        } else {
-          document.body.style.position = '';
-          document.body.style.width = '';
-        }
+        document.body.style.position = isActive ? 'fixed' : '';
+        document.body.style.width = isActive ? '100%' : '';
       }
     });
 
@@ -60,111 +52,95 @@
     }
   }
 
-  /* ===== SCROLL REVEAL (Desktop + iOS Fixed) ===== */
+  /* ===== SCROLL REVEAL — FIXED FOR DESKTOP ===== */
   function initScrollReveal() {
     var elements = document.querySelectorAll('.reveal');
     if (!elements.length) return;
 
+    // ★ STEP 1: Immediately reveal anything already in viewport
+    // This runs BEFORE IntersectionObserver even starts
+    revealVisible();
+
+    // ★ STEP 2: Set up IntersectionObserver for elements below the fold
     if ('IntersectionObserver' in window) {
       var observer = new IntersectionObserver(
         function (entries) {
           for (var i = 0; i < entries.length; i++) {
             if (entries[i].isIntersecting) {
-              var target = entries[i].target;
-              requestAnimationFrame(function () {
-                target.classList.add('visible');
-              });
+              entries[i].target.classList.add('visible');
               observer.unobserve(entries[i].target);
             }
           }
         },
         {
           root: null,
-          rootMargin: '50px 0px -10px 0px',
+          // ★ Large top margin catches elements already visible
+          rootMargin: '100px 0px -10px 0px',
           threshold: 0.01,
         }
       );
 
+      // Only observe elements NOT already visible
       for (var i = 0; i < elements.length; i++) {
-        observer.observe(elements[i]);
+        if (!elements[i].classList.contains('visible')) {
+          observer.observe(elements[i]);
+        }
       }
-
-      // ★★★ FIX: Check elements already in viewport on page load ★★★
-      // Run immediately
-      revealVisibleElements(elements);
-
-      // Run again after fonts/images might have loaded
-      setTimeout(function () {
-        revealVisibleElements(elements);
-      }, 100);
-
-      // Run once more after everything is settled
-      setTimeout(function () {
-        revealVisibleElements(elements);
-      }, 500);
-
-      // Also run when window fully loads (images, fonts, etc.)
-      window.addEventListener('load', function () {
-        setTimeout(function () {
-          revealVisibleElements(elements);
-        }, 100);
-      });
-
     } else {
-      // Fallback: show everything
+      // No IntersectionObserver — show everything
       for (var j = 0; j < elements.length; j++) {
         elements[j].classList.add('visible');
       }
     }
+
+    // ★ STEP 3: Re-check after short delays (fonts, images loading can shift layout)
+    setTimeout(revealVisible, 50);
+    setTimeout(revealVisible, 150);
+    setTimeout(revealVisible, 400);
+
+    // ★ STEP 4: Re-check when page fully loads
+    window.addEventListener('load', function () {
+      revealVisible();
+      setTimeout(revealVisible, 200);
+    });
   }
 
-  // ★★★ KEY FIX: Reveal elements already visible in viewport ★★★
-  function revealVisibleElements(elements) {
-    var windowHeight = window.innerHeight || document.documentElement.clientHeight;
+  // ★ Core function: Find and reveal all elements currently in viewport
+  function revealVisible() {
+    var elements = document.querySelectorAll('.reveal:not(.visible)');
+    if (!elements.length) return;
+
+    var vh = window.innerHeight || document.documentElement.clientHeight;
 
     for (var i = 0; i < elements.length; i++) {
-      if (elements[i].classList.contains('visible')) continue;
-
       var rect = elements[i].getBoundingClientRect();
 
-      // Element is in viewport if its top is above the bottom of the screen
-      // and its bottom is below the top of the screen
-      if (rect.top < windowHeight + 50 && rect.bottom > -50) {
-        // Use closure to capture the correct element
-        (function (el) {
-          requestAnimationFrame(function () {
-            el.classList.add('visible');
-          });
-        })(elements[i]);
+      // Element is visible if ANY part of it is on screen
+      // Added generous 100px buffer
+      if (rect.top < vh + 100 && rect.bottom > -100) {
+        elements[i].classList.add('visible');
       }
     }
   }
 
-  // Backup: Also check on scroll
-  var scrollTimer;
+  // ★ Backup: check on scroll (throttled)
+  var scrollRAF;
   window.addEventListener('scroll', function () {
-    clearTimeout(scrollTimer);
-    scrollTimer = setTimeout(function () {
-      var els = document.querySelectorAll('.reveal:not(.visible)');
-      if (els.length > 0) {
-        revealVisibleElements(els);
-      }
-    }, 80);
+    if (scrollRAF) return;
+    scrollRAF = requestAnimationFrame(function () {
+      revealVisible();
+      scrollRAF = null;
+    });
   }, { passive: true });
 
-  // Backup: Check on resize (in case layout shifts)
+  // ★ Backup: check on resize
   var resizeTimer;
   window.addEventListener('resize', function () {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(function () {
-      var els = document.querySelectorAll('.reveal:not(.visible)');
-      if (els.length > 0) {
-        revealVisibleElements(els);
-      }
-    }, 200);
+    resizeTimer = setTimeout(revealVisible, 150);
   }, { passive: true });
 
-  /* ===== SMOOTH SCROLL (All browsers) ===== */
+  /* ===== SMOOTH SCROLL ===== */
   function initSmoothScroll() {
     var anchors = document.querySelectorAll('a[href^="#"]');
 
@@ -177,7 +153,6 @@
         if (!target) return;
 
         e.preventDefault();
-
         var targetY = target.getBoundingClientRect().top + window.pageYOffset - 80;
 
         if (isIOS) {
@@ -198,13 +173,10 @@
 
     function step(timestamp) {
       if (!startTime) startTime = timestamp;
-      var elapsed = timestamp - startTime;
-      var progress = Math.min(elapsed / duration, 1);
+      var progress = Math.min((timestamp - startTime) / duration, 1);
       var eased = 1 - Math.pow(1 - progress, 3);
       window.scrollTo(0, startY + diff * eased);
-      if (progress < 1) {
-        requestAnimationFrame(step);
-      }
+      if (progress < 1) requestAnimationFrame(step);
     }
 
     requestAnimationFrame(step);
@@ -220,7 +192,7 @@
       var btn = form.querySelector('button[type="submit"]');
       if (!btn) return;
 
-      var originalHTML = btn.innerHTML;
+      var orig = btn.innerHTML;
       btn.innerHTML = 'Sending...';
       btn.disabled = true;
       btn.style.opacity = '0.7';
@@ -228,10 +200,10 @@
       setTimeout(function () {
         btn.innerHTML = '✓ Message Sent!';
         btn.style.background = '#00ff88';
-        btn.style.boxShadow = '0 0 40px rgba(0, 255, 136, 0.5)';
+        btn.style.boxShadow = '0 0 40px rgba(0,255,136,.5)';
 
         setTimeout(function () {
-          btn.innerHTML = originalHTML;
+          btn.innerHTML = orig;
           btn.style.background = '';
           btn.style.boxShadow = '';
           btn.disabled = false;
@@ -246,9 +218,9 @@
   function initCursor() {
     if (isTouchDevice || isIOS) return;
 
-    var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    var isDesktop = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-    if (prefersReducedMotion || !isDesktop) return;
+    var prm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var desk = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    if (prm || !desk) return;
 
     var dot = document.getElementById('cursor-dot');
     var ring = document.getElementById('cursor-ring');
@@ -257,8 +229,8 @@
 
     var trails = [];
     for (var t = 1; t <= 5; t++) {
-      var trail = document.getElementById('trail-' + t);
-      if (trail) trails.push(trail);
+      var tr = document.getElementById('trail-' + t);
+      if (tr) trails.push(tr);
     }
 
     dot.style.display = 'block';
@@ -266,46 +238,38 @@
     glow.style.display = 'block';
     for (var i = 0; i < trails.length; i++) trails[i].style.display = 'block';
 
-    var mouseX = 0, mouseY = 0, dotX = 0, dotY = 0;
-    var ringX = 0, ringY = 0, glowX = 0, glowY = 0;
-    var isMoving = false, moveTimeout;
-    var trailPositions = [];
-    for (var j = 0; j < trails.length; j++) trailPositions.push({ x: 0, y: 0 });
+    var mX = 0, mY = 0, dX = 0, dY = 0, rX = 0, rY = 0, gX = 0, gY = 0;
+    var moving = false, mt;
+    var tp = [];
+    for (var j = 0; j < trails.length; j++) tp.push({ x: 0, y: 0 });
 
     document.addEventListener('mousemove', function (e) {
-      mouseX = e.clientX;
-      mouseY = e.clientY;
-      isMoving = true;
-      clearTimeout(moveTimeout);
-      moveTimeout = setTimeout(function () { isMoving = false; }, 100);
+      mX = e.clientX; mY = e.clientY;
+      moving = true;
+      clearTimeout(mt);
+      mt = setTimeout(function () { moving = false; }, 100);
     }, { passive: true });
 
-    document.addEventListener('click', function (e) {
-      createBurst(e.clientX, e.clientY);
-    });
+    document.addEventListener('click', function (e) { burst(e.clientX, e.clientY); });
 
-    function createBurst(x, y) {
-      var colors = ['#00ff88', '#ff006e', '#00d4ff'];
+    function burst(x, y) {
+      var cols = ['#00ff88', '#ff006e', '#00d4ff'];
       for (var i = 0; i < 8; i++) {
         var p = document.createElement('div');
         p.style.cssText = 'position:fixed;width:4px;height:4px;border-radius:50%;pointer-events:none;z-index:99999;will-change:transform,opacity;';
-        var c = colors[Math.floor(Math.random() * colors.length)];
-        p.style.background = c;
-        p.style.left = x + 'px';
-        p.style.top = y + 'px';
+        var c = cols[Math.floor(Math.random() * cols.length)];
+        p.style.background = c; p.style.left = x + 'px'; p.style.top = y + 'px';
         p.style.boxShadow = '0 0 6px ' + c;
         document.body.appendChild(p);
-        var a = (Math.PI * 2 / 8) * i + Math.random() * 0.5;
-        var v = 60 + Math.random() * 40;
-        animP(p, x, y, x + Math.cos(a) * v, y + Math.sin(a) * v);
+        var a = (Math.PI * 2 / 8) * i + Math.random() * 0.5, v = 60 + Math.random() * 40;
+        anim(p, x, y, x + Math.cos(a) * v, y + Math.sin(a) * v);
       }
     }
 
-    function animP(el, sx, sy, ex, ey) {
+    function anim(el, sx, sy, ex, ey) {
       var st = performance.now(), d = 600;
       function tk(now) {
-        var pr = Math.min((now - st) / d, 1);
-        var ea = 1 - Math.pow(1 - pr, 3);
+        var pr = Math.min((now - st) / d, 1), ea = 1 - Math.pow(1 - pr, 3);
         el.style.left = sx + (ex - sx) * ea + 'px';
         el.style.top = sy + (ey - sy) * ea + 'px';
         el.style.opacity = 1 - pr;
@@ -316,30 +280,22 @@
       requestAnimationFrame(tk);
     }
 
-    function animate() {
-      dotX += (mouseX - dotX) * 0.35;
-      dotY += (mouseY - dotY) * 0.35;
-      dot.style.left = dotX + 'px';
-      dot.style.top = dotY + 'px';
-
-      ringX += (mouseX - ringX) * 0.15;
-      ringY += (mouseY - ringY) * 0.15;
-      ring.style.left = ringX + 'px';
-      ring.style.top = ringY + 'px';
-
-      glowX += (mouseX - glowX) * 0.08;
-      glowY += (mouseY - glowY) * 0.08;
-      glow.style.left = glowX + 'px';
-      glow.style.top = glowY + 'px';
+    function loop() {
+      dX += (mX - dX) * 0.35; dY += (mY - dY) * 0.35;
+      dot.style.left = dX + 'px'; dot.style.top = dY + 'px';
+      rX += (mX - rX) * 0.15; rY += (mY - rY) * 0.15;
+      ring.style.left = rX + 'px'; ring.style.top = rY + 'px';
+      gX += (mX - gX) * 0.08; gY += (mY - gY) * 0.08;
+      glow.style.left = gX + 'px'; glow.style.top = gY + 'px';
 
       for (var i = 0; i < trails.length; i++) {
-        var tg = i === 0 ? { x: dotX, y: dotY } : trailPositions[i - 1];
+        var tg = i === 0 ? { x: dX, y: dY } : tp[i - 1];
         var sp = 0.2 - i * 0.03;
-        trailPositions[i].x += (tg.x - trailPositions[i].x) * sp;
-        trailPositions[i].y += (tg.y - trailPositions[i].y) * sp;
-        trails[i].style.left = trailPositions[i].x + 'px';
-        trails[i].style.top = trailPositions[i].y + 'px';
-        if (isMoving) {
+        tp[i].x += (tg.x - tp[i].x) * sp;
+        tp[i].y += (tg.y - tp[i].y) * sp;
+        trails[i].style.left = tp[i].x + 'px';
+        trails[i].style.top = tp[i].y + 'px';
+        if (moving) {
           var to = 0.4 - i * 0.07, ts = 5 - i;
           trails[i].style.opacity = to;
           trails[i].style.width = ts + 'px';
@@ -351,71 +307,40 @@
         }
       }
 
-      var dx = mouseX - ringX, dy = mouseY - ringY;
+      var dx = mX - rX, dy = mY - rY;
       var sp2 = Math.sqrt(dx * dx + dy * dy);
       var sk = Math.min(sp2 * 0.3, 15);
       var an = Math.atan2(dy, dx) * (180 / Math.PI);
       var rt = 'translate(-50%,-50%) rotate(' + an + 'deg) scaleX(' + (1 + sk * 0.01) + ') translateZ(0)';
-      ring.style.webkitTransform = rt;
-      ring.style.transform = rt;
+      ring.style.webkitTransform = rt; ring.style.transform = rt;
 
-      requestAnimationFrame(animate);
+      requestAnimationFrame(loop);
     }
-    requestAnimationFrame(animate);
+    requestAnimationFrame(loop);
 
-    // Hover
-    var hoverEls = document.querySelectorAll('a,button,.service-card,.case-card,.result-card,.cert-card,.social-icon,.tech-item,.btn-primary,.btn-secondary,.magnetic-target');
-    for (var h = 0; h < hoverEls.length; h++) {
-      hoverEls[h].addEventListener('mouseenter', function () {
-        dot.classList.add('cursor-hover');
-        ring.classList.add('cursor-hover');
-      });
-      hoverEls[h].addEventListener('mouseleave', function () {
-        dot.classList.remove('cursor-hover');
-        ring.classList.remove('cursor-hover');
-      });
+    var hEls = document.querySelectorAll('a,button,.service-card,.case-card,.result-card,.cert-card,.social-icon,.tech-item,.btn-primary,.btn-secondary,.magnetic-target');
+    for (var h = 0; h < hEls.length; h++) {
+      hEls[h].addEventListener('mouseenter', function () { dot.classList.add('cursor-hover'); ring.classList.add('cursor-hover'); });
+      hEls[h].addEventListener('mouseleave', function () { dot.classList.remove('cursor-hover'); ring.classList.remove('cursor-hover'); });
     }
 
-    // Text cursor
-    var textEls = document.querySelectorAll('input,textarea');
-    for (var tt = 0; tt < textEls.length; tt++) {
-      textEls[tt].addEventListener('mouseenter', function () {
-        dot.classList.add('cursor-text');
-        ring.classList.add('cursor-text');
-        dot.classList.remove('cursor-hover');
-        ring.classList.remove('cursor-hover');
-      });
-      textEls[tt].addEventListener('mouseleave', function () {
-        dot.classList.remove('cursor-text');
-        ring.classList.remove('cursor-text');
-      });
+    var tEls = document.querySelectorAll('input,textarea');
+    for (var tt = 0; tt < tEls.length; tt++) {
+      tEls[tt].addEventListener('mouseenter', function () { dot.classList.add('cursor-text'); ring.classList.add('cursor-text'); dot.classList.remove('cursor-hover'); ring.classList.remove('cursor-hover'); });
+      tEls[tt].addEventListener('mouseleave', function () { dot.classList.remove('cursor-text'); ring.classList.remove('cursor-text'); });
     }
 
-    // Magnetic
-    var magEls = document.querySelectorAll('.magnetic-target');
-    for (var m = 0; m < magEls.length; m++) {
-      magEls[m].addEventListener('mousemove', function (e) {
+    var mEls = document.querySelectorAll('.magnetic-target');
+    for (var m = 0; m < mEls.length; m++) {
+      mEls[m].addEventListener('mousemove', function (e) {
         var r = this.getBoundingClientRect();
         var t = 'translate(' + ((e.clientX - r.left - r.width / 2) * 0.2) + 'px,' + ((e.clientY - r.top - r.height / 2) * 0.2) + 'px)';
-        this.style.webkitTransform = t;
-        this.style.transform = t;
+        this.style.webkitTransform = t; this.style.transform = t;
       });
-      magEls[m].addEventListener('mouseleave', function () {
-        this.style.webkitTransform = '';
-        this.style.transform = '';
-      });
+      mEls[m].addEventListener('mouseleave', function () { this.style.webkitTransform = ''; this.style.transform = ''; });
     }
 
-    // Hide/show cursor
-    document.addEventListener('mouseleave', function () {
-      dot.classList.add('cursor-hidden');
-      ring.classList.add('cursor-hidden');
-      glow.style.opacity = '0';
-    });
-    document.addEventListener('mouseenter', function () {
-      dot.classList.remove('cursor-hidden');
-      ring.classList.remove('cursor-hidden');
-      glow.style.opacity = '1';
-    });
+    document.addEventListener('mouseleave', function () { dot.classList.add('cursor-hidden'); ring.classList.add('cursor-hidden'); glow.style.opacity = '0'; });
+    document.addEventListener('mouseenter', function () { dot.classList.remove('cursor-hidden'); ring.classList.remove('cursor-hidden'); glow.style.opacity = '1'; });
   }
 })();
