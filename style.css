@@ -1,6 +1,6 @@
 /* ============================================
    TONY ADIJAH — PORTFOLIO CSS
-   v4.0 — Smooth reveal fix for desktop
+   v5.0 — Smooth staggered reveal animations
    iPhone 13 / iOS Safari FULLY FIXED
    ============================================ */
 
@@ -173,48 +173,104 @@ body {
 @media (max-width: 480px) { .grid-pattern { background-size: 40px 40px; opacity: .7; } }
 
 /* ============================================
-   ★★★ REVEAL ANIMATIONS — FIXED FOR DESKTOP ★★★
-   - Faster duration (0.5s)
-   - Smaller movement (20px)
-   - Tighter delays (0.05s increments)
-   - Group elements appear together
+   ★★★ REVEAL ANIMATIONS — SMOOTH STAGGERED ★★★
+   v5.0 — Delayed cascade for premium feel
    ============================================ */
+
+/* Base reveal state */
 .reveal {
   opacity: 0;
-  -webkit-transform: translateY(20px) translateZ(0);
-  transform: translateY(20px) translateZ(0);
-  -webkit-transition: opacity 0.5s cubic-bezier(0.25, 1, 0.5, 1), -webkit-transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
-  transition: opacity 0.5s cubic-bezier(0.25, 1, 0.5, 1), transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+  -webkit-transform: translateY(35px) translateZ(0);
+  transform: translateY(35px) translateZ(0);
+  -webkit-transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+                      -webkit-transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: opacity, transform;
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
 }
 
+/* Visible state */
 .reveal.visible {
   opacity: 1;
   -webkit-transform: translateY(0) translateZ(0);
   transform: translateY(0) translateZ(0);
 }
 
-/* ★ Tighter stagger delays — barely noticeable gap between siblings */
-.reveal-delay-1 { -webkit-transition-delay: 0.05s; transition-delay: 0.05s; }
-.reveal-delay-2 { -webkit-transition-delay: 0.1s; transition-delay: 0.1s; }
-.reveal-delay-3 { -webkit-transition-delay: 0.15s; transition-delay: 0.15s; }
-.reveal-delay-4 { -webkit-transition-delay: 0.2s; transition-delay: 0.2s; }
+/* ===== MANUAL DELAY CLASSES ===== */
+.reveal-delay-1 { -webkit-transition-delay: 0.15s; transition-delay: 0.15s; }
+.reveal-delay-2 { -webkit-transition-delay: 0.3s; transition-delay: 0.3s; }
+.reveal-delay-3 { -webkit-transition-delay: 0.45s; transition-delay: 0.45s; }
+.reveal-delay-4 { -webkit-transition-delay: 0.6s; transition-delay: 0.6s; }
+.reveal-delay-5 { -webkit-transition-delay: 0.75s; transition-delay: 0.75s; }
 
-/* ★ Once visible, remove delays so future transitions are instant */
-.reveal.visible.reveal-delay-1,
-.reveal.visible.reveal-delay-2,
-.reveal.visible.reveal-delay-3,
-.reveal.visible.reveal-delay-4 {
+/* ===== HERO SECTION — ELEGANT CASCADE ===== */
+.hero .reveal:nth-child(1) { -webkit-transition-delay: 0.2s; transition-delay: 0.2s; }
+.hero .reveal:nth-child(2) { -webkit-transition-delay: 0.35s; transition-delay: 0.35s; }
+.hero .reveal:nth-child(3) { -webkit-transition-delay: 0.5s; transition-delay: 0.5s; }
+.hero .reveal:nth-child(4) { -webkit-transition-delay: 0.65s; transition-delay: 0.65s; }
+.hero .reveal:nth-child(5) { -webkit-transition-delay: 0.8s; transition-delay: 0.8s; }
+.hero .reveal:nth-child(6) { -webkit-transition-delay: 0.95s; transition-delay: 0.95s; }
+
+/* ===== SERVICE CARDS — WAVE EFFECT ===== */
+.service-card.reveal:nth-of-type(1) { -webkit-transition-delay: 0.15s; transition-delay: 0.15s; }
+.service-card.reveal:nth-of-type(2) { -webkit-transition-delay: 0.3s; transition-delay: 0.3s; }
+.service-card.reveal:nth-of-type(3) { -webkit-transition-delay: 0.45s; transition-delay: 0.45s; }
+.service-card.reveal:nth-of-type(4) { -webkit-transition-delay: 0.6s; transition-delay: 0.6s; }
+
+/* ===== CASE STUDY CARDS ===== */
+.case-card.reveal:nth-of-type(1) { -webkit-transition-delay: 0.2s; transition-delay: 0.2s; }
+.case-card.reveal:nth-of-type(2) { -webkit-transition-delay: 0.4s; transition-delay: 0.4s; }
+.case-card.reveal:nth-of-type(3) { -webkit-transition-delay: 0.6s; transition-delay: 0.6s; }
+
+/* ===== RESULT CARDS ===== */
+.result-card.reveal:nth-of-type(1) { -webkit-transition-delay: 0.15s; transition-delay: 0.15s; }
+.result-card.reveal:nth-of-type(2) { -webkit-transition-delay: 0.3s; transition-delay: 0.3s; }
+.result-card.reveal:nth-of-type(3) { -webkit-transition-delay: 0.45s; transition-delay: 0.45s; }
+
+/* ===== CERTIFICATION CARDS ===== */
+.cert-card.reveal:nth-of-type(1) { -webkit-transition-delay: 0.2s; transition-delay: 0.2s; }
+.cert-card.reveal:nth-of-type(2) { -webkit-transition-delay: 0.4s; transition-delay: 0.4s; }
+
+/* ===== TIMELINE ITEMS ===== */
+.timeline-item.reveal:nth-of-type(1) { -webkit-transition-delay: 0.15s; transition-delay: 0.15s; }
+.timeline-item.reveal:nth-of-type(2) { -webkit-transition-delay: 0.3s; transition-delay: 0.3s; }
+.timeline-item.reveal:nth-of-type(3) { -webkit-transition-delay: 0.45s; transition-delay: 0.45s; }
+.timeline-item.reveal:nth-of-type(4) { -webkit-transition-delay: 0.6s; transition-delay: 0.6s; }
+
+/* ===== SOCIAL ICONS ===== */
+.social-icon.reveal:nth-of-type(1) { -webkit-transition-delay: 0.1s; transition-delay: 0.1s; }
+.social-icon.reveal:nth-of-type(2) { -webkit-transition-delay: 0.2s; transition-delay: 0.2s; }
+.social-icon.reveal:nth-of-type(3) { -webkit-transition-delay: 0.3s; transition-delay: 0.3s; }
+.social-icon.reveal:nth-of-type(4) { -webkit-transition-delay: 0.4s; transition-delay: 0.4s; }
+
+/* ===== SECTION HEADERS — ALWAYS FIRST ===== */
+.section-label.reveal { -webkit-transition-delay: 0s; transition-delay: 0s; }
+h2.reveal, .section-title.reveal { -webkit-transition-delay: 0.12s; transition-delay: 0.12s; }
+
+/* ===== CLEAR DELAYS AFTER VISIBLE ===== */
+.reveal.visible {
   -webkit-transition-delay: 0s;
   transition-delay: 0s;
 }
 
+/* ===== REDUCED MOTION ===== */
 @media (prefers-reduced-motion: reduce) {
-  .reveal { opacity: 1; -webkit-transform: none; transform: none; -webkit-transition: none; transition: none; }
-  .gradient-orb,.tech-marquee,.text-shimmer,.text-shimmer-secondary,.cert-glow { -webkit-animation: none !important; animation: none !important; }
-  .cursor-dot,.cursor-ring,.cursor-glow,.cursor-trail { display: none !important; }
+  .reveal { 
+    opacity: 1; 
+    -webkit-transform: none; 
+    transform: none; 
+    -webkit-transition: none; 
+    transition: none; 
+  }
+  .gradient-orb, .tech-marquee, .text-shimmer, .text-shimmer-secondary, .cert-glow { 
+    -webkit-animation: none !important; 
+    animation: none !important; 
+  }
+  .cursor-dot, .cursor-ring, .cursor-glow, .cursor-trail { 
+    display: none !important; 
+  }
   * { cursor: auto !important; }
 }
 
