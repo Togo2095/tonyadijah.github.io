@@ -2,19 +2,24 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <meta name="description" content="Tony Adijah — GTM Engineer & Marketing Head. I build high-ROI outbound systems and automation for B2B SaaS companies.">
   <meta name="theme-color" content="#050505">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Tony Adijah — GTM Engineer & Marketing Head</title>
 
+  <!-- Preload critical resources -->
   <link rel="preload" href="style.css" as="style">
   <link rel="preload" href="tony.png" as="image">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Main CSS -->
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -29,7 +34,7 @@
   <div class="cursor-trail" id="trail-4" aria-hidden="true"></div>
   <div class="cursor-trail" id="trail-5" aria-hidden="true"></div>
 
-  <!-- Background -->
+  <!-- Background Effects -->
   <div class="gradient-bg" aria-hidden="true">
     <div class="gradient-orb orb-1"></div>
     <div class="gradient-orb orb-2"></div>
@@ -37,7 +42,7 @@
   </div>
   <div class="grid-pattern" aria-hidden="true"></div>
 
-  <!-- Mobile Menu -->
+  <!-- Mobile Menu Overlay -->
   <div class="mobile-menu" id="mobile-menu">
     <a href="#services">Services</a>
     <a href="#results">Results</a>
@@ -48,7 +53,7 @@
   </div>
 
   <!-- Navigation -->
-  <nav class="fixed top-0 left-0 right-0 z-50 nav-glass safe-top">
+  <nav class="fixed top-0 left-0 right-0 z-50 nav-glass">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
       <a href="#" class="font-display text-xl sm:text-2xl font-bold tracking-tight magnetic-target no-underline">
         <span class="text-glow accent-color">T</span><span class="muted-color">.</span>
@@ -77,7 +82,7 @@
   </nav>
 
   <!-- Hero -->
-  <header class="relative z-10 min-h-screen flex items-center pt-20 sm:pt-24 pb-10 sm:pb-16 safe-top-pad">
+  <header class="relative z-10 min-h-screen flex items-center pt-20 sm:pt-24 pb-10 sm:pb-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 w-full">
       <div class="grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-20 items-center">
         <div class="space-y-5 sm:space-y-8 hero-content-text order-2 lg:order-1">
@@ -128,14 +133,50 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6">
       <div class="text-center mb-10 sm:mb-16">
         <span class="section-label reveal">What I Do</span>
-        <h2 class="font-display text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mt-4 sm:mt-6 reveal reveal-delay-1">Services & <span class="muted-color">Expertise</span></h2>
-        <p class="muted-color max-w-2xl mx-auto mt-3 sm:mt-4 text-sm sm:text-base reveal reveal-delay-2">Results-driven strategies to scale your outbound and automate your revenue engine.</p>
+        <h2 class="font-display text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mt-4 sm:mt-6 reveal reveal-delay-1">
+          Services & <span class="muted-color">Expertise</span>
+        </h2>
+        <p class="muted-color max-w-2xl mx-auto mt-3 sm:mt-4 text-sm sm:text-base reveal reveal-delay-2">
+          Results-driven strategies to scale your outbound and automate your revenue engine.
+        </p>
       </div>
       <div class="grid sm:grid-cols-2 gap-3 sm:gap-6 md:gap-8">
-        <article class="service-card reveal"><div class="card-inner"><div class="icon-box icon-gradient-1"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2"><path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3zm-8.27 4a2 2 0 0 1-3.46 0"/></svg></div><h3 class="font-display text-lg sm:text-xl md:text-2xl font-bold">Outbound Strategy & Campaigns</h3><p class="muted-color mt-2 sm:mt-3 text-xs sm:text-sm md:text-base">Design and execute targeted email and LinkedIn outreach to fill your sales pipeline. Data-driven campaigns that improve response rates and book meetings.</p></div></article>
-        <article class="service-card reveal reveal-delay-1"><div class="card-inner"><div class="icon-box icon-gradient-2"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><h3 class="font-display text-lg sm:text-xl md:text-2xl font-bold">Lead Sourcing & CRM Integration</h3><p class="muted-color mt-2 sm:mt-3 text-xs sm:text-sm md:text-base">Build and clean high-quality lead lists using Clay, Apollo, and Sales Navigator. Seamless CRM integration ensures you're always engaging the right prospects.</p></div></article>
-        <article class="service-card reveal reveal-delay-2"><div class="card-inner"><div class="icon-box icon-gradient-3"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg></div><h3 class="font-display text-lg sm:text-xl md:text-2xl font-bold">Automation & Workflows</h3><p class="muted-color mt-2 sm:mt-3 text-xs sm:text-sm md:text-base">Create no-code workflows with n8n and Zapier that automate follow-ups and lead nurturing. Streamline outreach, reduce manual work, and boost engagement.</p></div></article>
-        <article class="service-card reveal reveal-delay-3"><div class="card-inner"><div class="icon-box icon-gradient-4"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg></div><h3 class="font-display text-lg sm:text-xl md:text-2xl font-bold">GTM Operations & Consulting</h3><p class="muted-color mt-2 sm:mt-3 text-xs sm:text-sm md:text-base">Align marketing, sales, and product teams on strategy and execution. Develop dashboards and processes that make pipeline growth predictable.</p></div></article>
+        <article class="service-card reveal">
+          <div class="relative z-10 p-5 sm:p-6 md:p-8">
+            <div class="icon-box icon-gradient-1">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2"><path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3zm-8.27 4a2 2 0 0 1-3.46 0"/></svg>
+            </div>
+            <h3 class="font-display text-lg sm:text-xl md:text-2xl font-bold">Outbound Strategy & Campaigns</h3>
+            <p class="muted-color mt-2 sm:mt-3 text-xs sm:text-sm md:text-base">Design and execute targeted email and LinkedIn outreach to fill your sales pipeline. Data-driven campaigns that improve response rates and book meetings.</p>
+          </div>
+        </article>
+        <article class="service-card reveal reveal-delay-1">
+          <div class="relative z-10 p-5 sm:p-6 md:p-8">
+            <div class="icon-box icon-gradient-2">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <h3 class="font-display text-lg sm:text-xl md:text-2xl font-bold">Lead Sourcing & CRM Integration</h3>
+            <p class="muted-color mt-2 sm:mt-3 text-xs sm:text-sm md:text-base">Build and clean high-quality lead lists using Clay, Apollo, and Sales Navigator. Seamless CRM integration ensures you're always engaging the right prospects.</p>
+          </div>
+        </article>
+        <article class="service-card reveal reveal-delay-2">
+          <div class="relative z-10 p-5 sm:p-6 md:p-8">
+            <div class="icon-box icon-gradient-3">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+            </div>
+            <h3 class="font-display text-lg sm:text-xl md:text-2xl font-bold">Automation & Workflows</h3>
+            <p class="muted-color mt-2 sm:mt-3 text-xs sm:text-sm md:text-base">Create no-code workflows with n8n and Zapier that automate follow-ups and lead nurturing. Streamline outreach, reduce manual work, and boost engagement.</p>
+          </div>
+        </article>
+        <article class="service-card reveal reveal-delay-3">
+          <div class="relative z-10 p-5 sm:p-6 md:p-8">
+            <div class="icon-box icon-gradient-4">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+            </div>
+            <h3 class="font-display text-lg sm:text-xl md:text-2xl font-bold">GTM Operations & Consulting</h3>
+            <p class="muted-color mt-2 sm:mt-3 text-xs sm:text-sm md:text-base">Align marketing, sales, and product teams on strategy and execution. Develop dashboards and processes that make pipeline growth predictable.</p>
+          </div>
+        </article>
       </div>
     </div>
   </section>
@@ -145,25 +186,52 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6">
       <div class="text-center mb-10 sm:mb-16">
         <span class="section-label reveal">Real Results</span>
-        <h2 class="font-display text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mt-4 sm:mt-6 reveal reveal-delay-1">Impact in <span class="muted-color">Numbers</span></h2>
+        <h2 class="font-display text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mt-4 sm:mt-6 reveal reveal-delay-1">
+          Impact in <span class="muted-color">Numbers</span>
+        </h2>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6 md:gap-8">
-        <article class="result-card reveal text-center p-5 sm:p-6 md:p-8"><div class="relative z-10"><div class="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-glow mb-2 accent-color">~25%</div><h3 class="font-display text-base sm:text-lg md:text-xl font-bold">Lead Quality Improvement</h3><p class="muted-color mt-2 text-xs sm:text-sm">Better targeting & personalization</p></div></article>
-        <article class="result-card reveal reveal-delay-1 text-center p-5 sm:p-6 md:p-8"><div class="relative z-10"><div class="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-2 accent-secondary-color">2x</div><h3 class="font-display text-base sm:text-lg md:text-xl font-bold">Reply Rate Boost</h3><p class="muted-color mt-2 text-xs sm:text-sm">Optimized email sequences</p></div></article>
-        <article class="result-card reveal reveal-delay-2 text-center p-5 sm:p-6 md:p-8"><div class="relative z-10"><div class="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-2 accent-tertiary-color">10+</div><h3 class="font-display text-base sm:text-lg md:text-xl font-bold">Hours Saved Weekly</h3><p class="muted-color mt-2 text-xs sm:text-sm">Via automation workflows</p></div></article>
+        <article class="result-card reveal text-center p-5 sm:p-6 md:p-8">
+          <div class="relative z-10">
+            <div class="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-glow mb-2 accent-color">~25%</div>
+            <h3 class="font-display text-base sm:text-lg md:text-xl font-bold">Lead Quality Improvement</h3>
+            <p class="muted-color mt-2 text-xs sm:text-sm">Better targeting & personalization</p>
+          </div>
+        </article>
+        <article class="result-card reveal reveal-delay-1 text-center p-5 sm:p-6 md:p-8">
+          <div class="relative z-10">
+            <div class="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-2 accent-secondary-color">2x</div>
+            <h3 class="font-display text-base sm:text-lg md:text-xl font-bold">Reply Rate Boost</h3>
+            <p class="muted-color mt-2 text-xs sm:text-sm">Optimized email sequences</p>
+          </div>
+        </article>
+        <article class="result-card reveal reveal-delay-2 text-center p-5 sm:p-6 md:p-8">
+          <div class="relative z-10">
+            <div class="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-2 accent-tertiary-color">10+</div>
+            <h3 class="font-display text-base sm:text-lg md:text-xl font-bold">Hours Saved Weekly</h3>
+            <p class="muted-color mt-2 text-xs sm:text-sm">Via automation workflows</p>
+          </div>
+        </article>
       </div>
     </div>
   </section>
 
   <!-- Tech Stack -->
-  <section class="relative z-10 py-10 sm:py-16 bg-elevated border-t border-b" style="border-color:var(--border)">
+  <section class="relative z-10 py-10 sm:py-16 bg-elevated border-t border-b" style="border-color: var(--border);">
     <div class="max-w-7xl mx-auto px-4 sm:px-6">
       <div class="text-center mb-6 sm:mb-8">
         <span class="section-label reveal">Tools I Use</span>
-        <h2 class="font-display text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mt-3 sm:mt-4 reveal reveal-delay-1">Tech <span class="muted-color">Stack</span></h2>
+        <h2 class="font-display text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mt-3 sm:mt-4 reveal reveal-delay-1">
+          Tech <span class="muted-color">Stack</span>
+        </h2>
       </div>
     </div>
-    <div class="tech-marquee-container"><div class="tech-marquee"><span class="tech-item">Clay (Certified)</span><span class="tech-item">n8n</span><span class="tech-item">Zapier</span><span class="tech-item">Instantly.ai</span><span class="tech-item">Lemlist</span><span class="tech-item">Smartlead</span><span class="tech-item">Apollo</span><span class="tech-item">Sales Navigator</span><span class="tech-item">HubSpot CRM</span><span class="tech-item">Slack</span><span class="tech-item">Clay (Certified)</span><span class="tech-item">n8n</span><span class="tech-item">Zapier</span><span class="tech-item">Instantly.ai</span><span class="tech-item">Lemlist</span><span class="tech-item">Smartlead</span><span class="tech-item">Apollo</span><span class="tech-item">Sales Navigator</span><span class="tech-item">HubSpot CRM</span><span class="tech-item">Slack</span></div></div>
+    <div class="tech-marquee-container">
+      <div class="tech-marquee">
+        <span class="tech-item">Clay (Certified)</span><span class="tech-item">n8n</span><span class="tech-item">Zapier</span><span class="tech-item">Instantly.ai</span><span class="tech-item">Lemlist</span><span class="tech-item">Smartlead</span><span class="tech-item">Apollo</span><span class="tech-item">Sales Navigator</span><span class="tech-item">HubSpot CRM</span><span class="tech-item">Slack</span>
+        <span class="tech-item">Clay (Certified)</span><span class="tech-item">n8n</span><span class="tech-item">Zapier</span><span class="tech-item">Instantly.ai</span><span class="tech-item">Lemlist</span><span class="tech-item">Smartlead</span><span class="tech-item">Apollo</span><span class="tech-item">Sales Navigator</span><span class="tech-item">HubSpot CRM</span><span class="tech-item">Slack</span>
+      </div>
+    </div>
   </section>
 
   <!-- Case Studies -->
@@ -171,27 +239,52 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6">
       <div class="text-center mb-10 sm:mb-16">
         <span class="section-label reveal">Case Studies</span>
-        <h2 class="font-display text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mt-4 sm:mt-6 reveal reveal-delay-1">Workflow <span class="muted-color">Showcase</span></h2>
-        <p class="muted-color max-w-2xl mx-auto mt-3 sm:mt-4 text-sm sm:text-base reveal reveal-delay-2">Real-world automation and GTM systems I've built using Clay and n8n.</p>
+        <h2 class="font-display text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mt-4 sm:mt-6 reveal reveal-delay-1">
+          Workflow <span class="muted-color">Showcase</span>
+        </h2>
+        <p class="muted-color max-w-2xl mx-auto mt-3 sm:mt-4 text-sm sm:text-base reveal reveal-delay-2">
+          Real-world automation and GTM systems I've built using Clay and n8n.
+        </p>
       </div>
       <div class="grid sm:grid-cols-2 gap-3 sm:gap-6 md:gap-8 max-w-4xl mx-auto">
+        <!-- n8n Card (Clickable) -->
         <a href="n8n-case-study.html" class="case-card reveal block group no-underline fg-color">
-          <div class="card-inner">
-            <div class="icon-box-lg icon-gradient-2"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
+          <div class="relative z-10 p-5 sm:p-6 md:p-8">
+            <div class="icon-box-lg icon-gradient-2">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            </div>
             <div class="accent-secondary-color font-bold text-xs uppercase tracking-wider mb-2">n8n Workflows</div>
             <h3 class="font-display text-lg sm:text-xl md:text-2xl font-bold">Automated Outreach Engine</h3>
             <p class="muted-color mt-2 sm:mt-3 text-xs sm:text-sm md:text-base">Built custom n8n workflows to automate lead enrichment, multi-step follow-ups, and real-time notifications.</p>
-            <div class="card-divider"><div class="flex flex-wrap gap-1.5 sm:gap-2"><span class="tag tag-pink">n8n</span><span class="tag tag-pink">Lead Enrichment</span><span class="tag tag-pink">Follow-ups</span></div></div>
-            <div class="mt-3 sm:mt-6 flex items-center gap-2 accent-secondary-color font-semibold text-xs sm:text-sm"><span>View Case Study</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="arrow-icon"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+            <div class="mt-3 sm:mt-6 pt-3 sm:pt-6" style="border-top: 1px solid var(--border);">
+              <div class="flex flex-wrap gap-1.5 sm:gap-2">
+                <span class="tag tag-pink">n8n</span>
+                <span class="tag tag-pink">Lead Enrichment</span>
+                <span class="tag tag-pink">Follow-ups</span>
+              </div>
+            </div>
+            <div class="mt-3 sm:mt-6 flex items-center gap-2 accent-secondary-color font-semibold text-xs sm:text-sm">
+              <span>View Case Study</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="arrow-icon"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
           </div>
         </a>
+        <!-- Clay Card -->
         <article class="case-card reveal reveal-delay-1">
-          <div class="card-inner">
-            <div class="icon-box-lg icon-gradient-3"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div>
+          <div class="relative z-10 p-5 sm:p-6 md:p-8">
+            <div class="icon-box-lg icon-gradient-3">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+            </div>
             <div class="accent-tertiary-color font-bold text-xs uppercase tracking-wider mb-2">Clay Workflows</div>
             <h3 class="font-display text-lg sm:text-xl md:text-2xl font-bold">Data Enrichment Pipeline</h3>
             <p class="muted-color mt-2 sm:mt-3 text-xs sm:text-sm md:text-base">Implemented Clay to build high-quality, enriched lead lists at scale with seamless CRM integration.</p>
-            <div class="card-divider"><div class="flex flex-wrap gap-1.5 sm:gap-2"><span class="tag tag-blue">Clay</span><span class="tag tag-blue">Data Enrichment</span><span class="tag tag-blue">CRM Sync</span></div></div>
+            <div class="mt-3 sm:mt-6 pt-3 sm:pt-6" style="border-top: 1px solid var(--border);">
+              <div class="flex flex-wrap gap-1.5 sm:gap-2">
+                <span class="tag tag-blue">Clay</span>
+                <span class="tag tag-blue">Data Enrichment</span>
+                <span class="tag tag-blue">CRM Sync</span>
+              </div>
+            </div>
           </div>
         </article>
       </div>
@@ -203,18 +296,29 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6">
       <div class="text-center mb-10 sm:mb-16">
         <span class="section-label reveal">Certified</span>
-        <h2 class="font-display text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mt-4 sm:mt-6 reveal reveal-delay-1">Clay <span class="muted-color">Certification</span></h2>
-        <p class="muted-color max-w-2xl mx-auto mt-3 sm:mt-4 text-sm sm:text-base reveal reveal-delay-2">Officially certified by Clay — validating expertise in data enrichment, workflow automation, and GTM infrastructure.</p>
+        <h2 class="font-display text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mt-4 sm:mt-6 reveal reveal-delay-1">
+          Clay <span class="muted-color">Certification</span>
+        </h2>
+        <p class="muted-color max-w-2xl mx-auto mt-3 sm:mt-4 text-sm sm:text-base reveal reveal-delay-2">
+          Officially certified by Clay — validating expertise in data enrichment, workflow automation, and GTM infrastructure.
+        </p>
       </div>
       <div class="max-w-3xl mx-auto reveal reveal-delay-2">
         <div class="cert-card">
           <div class="cert-glow"></div>
           <div class="relative z-10 p-5 sm:p-8 md:p-12">
             <div class="flex flex-col items-center text-center">
-              <div class="w-full mb-5 sm:mb-8"><img src="outbound-automation-certification.png" alt="Clay Certification — Tony Adijah" class="cert-image" loading="lazy" decoding="async"></div>
-              <div class="verified-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="var(--accent)" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><span>Verified Credential</span></div>
+              <div class="w-full mb-5 sm:mb-8">
+                <img src="outbound-automation-certification.png" alt="Clay Certification — Tony Adijah" class="cert-image" loading="lazy" decoding="async">
+              </div>
+              <div class="verified-badge">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="var(--accent)" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <span>Verified Credential</span>
+              </div>
               <h3 class="font-display text-xl sm:text-2xl md:text-3xl font-bold mb-2 sm:mb-3">Clay Certified Expert</h3>
-              <p class="muted-color mb-5 sm:mb-8 leading-relaxed max-w-xl text-xs sm:text-sm md:text-base">Proficient in building advanced Clay tables, data enrichment workflows, waterfall enrichment strategies, and seamless CRM integrations.</p>
+              <p class="muted-color mb-5 sm:mb-8 leading-relaxed max-w-xl text-xs sm:text-sm md:text-base">
+                Proficient in building advanced Clay tables, data enrichment workflows, waterfall enrichment strategies, and seamless CRM integrations.
+              </p>
               <div class="grid grid-cols-3 gap-2 sm:gap-3 w-full max-w-md">
                 <div class="skill-box"><div class="skill-label">Skill</div><div class="skill-name">Data Enrichment</div></div>
                 <div class="skill-box"><div class="skill-label">Skill</div><div class="skill-name">Waterfall Logic</div></div>
@@ -232,22 +336,64 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6">
       <div class="grid lg:grid-cols-2 gap-10 lg:gap-20">
         <div class="space-y-5 sm:space-y-8">
-          <div><span class="section-label reveal">About Me</span><h2 class="font-display text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mt-4 sm:mt-6 leading-tight reveal reveal-delay-1">Results-driven<br><span class="text-shimmer">GTM Engineer</span></h2></div>
+          <div>
+            <span class="section-label reveal">About Me</span>
+            <h2 class="font-display text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mt-4 sm:mt-6 leading-tight reveal reveal-delay-1">
+              Results-driven<br><span class="text-shimmer">GTM Engineer</span>
+            </h2>
+          </div>
           <div class="space-y-3 sm:space-y-6 text-sm sm:text-base md:text-lg muted-color reveal reveal-delay-2">
             <p>I'm a GTM Engineer and Marketing Head with 2+ years leading outbound marketing and sales automation. I build scalable outbound campaigns, master CRM systems, and drive data-driven decisions.</p>
             <p><span class="fg-color">Certified in Clay</span>, I specialize in data enrichment, workflow automation, and creating systems that generate consistent pipeline.</p>
           </div>
           <div class="flex flex-wrap gap-2 sm:gap-3 reveal reveal-delay-3">
-            <div class="info-chip"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><span class="font-medium">Remote / Worldwide</span></div>
-            <div class="info-chip"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent-secondary)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span class="font-medium">Freelance & Full-time</span></div>
-            <a href="https://www.linkedin.com/in/tony-adijah-965903131/" target="_blank" rel="noopener noreferrer" class="info-chip no-underline fg-color"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent-tertiary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg><span class="font-medium">LinkedIn</span></a>
+            <div class="info-chip">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <span class="font-medium">Remote / Worldwide</span>
+            </div>
+            <div class="info-chip">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent-secondary)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <span class="font-medium">Freelance & Full-time</span>
+            </div>
+            <a href="https://www.linkedin.com/in/tony-adijah-965903131/" target="_blank" rel="noopener noreferrer" class="info-chip no-underline fg-color group">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent-tertiary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+              <span class="font-medium">LinkedIn</span>
+            </a>
           </div>
         </div>
         <div class="space-y-5 sm:space-y-8">
           <h3 class="font-display text-xl sm:text-2xl font-bold reveal">Experience</h3>
           <div>
-            <div class="timeline-item reveal reveal-delay-1"><div><div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-4"><h4 class="font-display text-base sm:text-lg md:text-xl font-bold">GTM Engineer / Marketing Head</h4><span class="time-badge">2023 — 2025</span></div><p class="accent-color font-medium mt-1 text-xs sm:text-base">Grow with Veena</p><ul class="text-[10px] sm:text-sm muted-color mt-2 space-y-1 list-disc list-inside"><li>Built and executed GTM strategies for product launches.</li><li>Automated outbound (email + LinkedIn) to scale lead generation.</li><li>Improved lead quality by ~25% through targeting.</li><li>Handled CRM, deliverability, and outreach infrastructure end-to-end.</li></ul></div></div>
-            <div class="timeline-item reveal reveal-delay-2"><div><div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-4"><h4 class="font-display text-base sm:text-lg md:text-xl font-bold">Territory Sales Manager</h4><span class="time-badge">2019 — 2023</span></div><p class="accent-secondary-color font-medium mt-1 text-xs sm:text-base">Metropolis Healthcare</p><ul class="text-[10px] sm:text-sm muted-color mt-2 space-y-1 list-disc list-inside"><li>Owned territory growth and revenue targets.</li><li>Opened new accounts and expanded key relationships.</li><li>Handled on-ground sales, partnerships, and customer issues.</li><li>Identified new market opportunities and demand pockets.</li></ul></div></div>
+            <div class="timeline-item reveal reveal-delay-1">
+              <div>
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-4">
+                  <h4 class="font-display text-base sm:text-lg md:text-xl font-bold">GTM Engineer / Marketing Head</h4>
+                  <span class="time-badge">2023 — 2025</span>
+                </div>
+                <p class="accent-color font-medium mt-1 text-xs sm:text-base">Grow with Veena</p>
+                <ul class="text-[10px] sm:text-sm muted-color mt-2 space-y-1 list-disc list-inside">
+                  <li>Built and executed GTM strategies for product launches.</li>
+                  <li>Automated outbound (email + LinkedIn) to scale lead generation.</li>
+                  <li>Improved lead quality by ~25% through targeting.</li>
+                  <li>Handled CRM, deliverability, and outreach infrastructure end-to-end.</li>
+                </ul>
+              </div>
+            </div>
+            <div class="timeline-item reveal reveal-delay-2">
+              <div>
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-4">
+                  <h4 class="font-display text-base sm:text-lg md:text-xl font-bold">Territory Sales Manager</h4>
+                  <span class="time-badge">2019 — 2023</span>
+                </div>
+                <p class="accent-secondary-color font-medium mt-1 text-xs sm:text-base">Metropolis Healthcare</p>
+                <ul class="text-[10px] sm:text-sm muted-color mt-2 space-y-1 list-disc list-inside">
+                  <li>Owned territory growth and revenue targets.</li>
+                  <li>Opened new accounts and expanded key relationships.</li>
+                  <li>Handled on-ground sales, partnerships, and customer issues.</li>
+                  <li>Identified new market opportunities and demand pockets.</li>
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -259,33 +405,83 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6">
       <div class="grid lg:grid-cols-2 gap-10 lg:gap-20">
         <div class="space-y-5 sm:space-y-8">
-          <div><span class="section-label reveal">Contact</span><h2 class="font-display text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mt-4 sm:mt-6 leading-tight reveal reveal-delay-1">Ready to<br><span class="text-shimmer">Scale?</span></h2></div>
-          <p class="text-sm sm:text-base md:text-lg muted-color max-w-md reveal reveal-delay-2">Open to freelance, consulting, and full-time roles. Let's grow your sales engine.</p>
+          <div>
+            <span class="section-label reveal">Contact</span>
+            <h2 class="font-display text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mt-4 sm:mt-6 leading-tight reveal reveal-delay-1">
+              Ready to<br><span class="text-shimmer">Scale?</span>
+            </h2>
+          </div>
+          <p class="text-sm sm:text-base md:text-lg muted-color max-w-md reveal reveal-delay-2">
+            Open to freelance, consulting, and full-time roles. Let's grow your sales engine.
+          </p>
           <div class="space-y-3 reveal reveal-delay-3">
-            <a href="mailto:adijah95@gmail.com" class="contact-link no-underline fg-color"><div class="contact-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div><div class="min-w-0"><div class="text-[10px] sm:text-sm muted-color">Email me at</div><div class="font-medium text-sm sm:text-lg truncate">adijah95@gmail.com</div></div></a>
-            <a href="https://www.linkedin.com/in/tony-adijah-965903131/" target="_blank" rel="noopener noreferrer" class="contact-link no-underline fg-color"><div class="contact-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-tertiary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></div><div><div class="text-[10px] sm:text-sm muted-color">Connect on</div><div class="font-medium text-sm sm:text-lg">LinkedIn</div></div></a>
+            <a href="mailto:adijah95@gmail.com" class="contact-link group no-underline fg-color">
+              <div class="contact-icon contact-icon-green">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              </div>
+              <div class="min-w-0">
+                <div class="text-[10px] sm:text-sm muted-color">Email me at</div>
+                <div class="font-medium text-sm sm:text-lg truncate">adijah95@gmail.com</div>
+              </div>
+            </a>
+            <a href="https://www.linkedin.com/in/tony-adijah-965903131/" target="_blank" rel="noopener noreferrer" class="contact-link group no-underline fg-color">
+              <div class="contact-icon contact-icon-blue">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-tertiary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+              </div>
+              <div>
+                <div class="text-[10px] sm:text-sm muted-color">Connect on</div>
+                <div class="font-medium text-sm sm:text-lg">LinkedIn</div>
+              </div>
+            </a>
           </div>
         </div>
         <form class="space-y-3 sm:space-y-6 reveal reveal-delay-2" id="contact-form">
-          <div class="grid sm:grid-cols-2 gap-3 sm:gap-6"><div><label for="name" class="block text-xs sm:text-sm font-medium mb-1.5 sm:mb-3">Name</label><input type="text" id="name" name="name" class="input-field" placeholder="Your Name" required></div><div><label for="email" class="block text-xs sm:text-sm font-medium mb-1.5 sm:mb-3">Email</label><input type="email" id="email" name="email" class="input-field" placeholder="you@company.com" required></div></div>
-          <div><label for="subject" class="block text-xs sm:text-sm font-medium mb-1.5 sm:mb-3">Subject</label><input type="text" id="subject" name="subject" class="input-field" placeholder="Project Inquiry"></div>
-          <div><label for="message" class="block text-xs sm:text-sm font-medium mb-1.5 sm:mb-3">Message</label><textarea id="message" name="message" rows="4" class="input-field resize-none" placeholder="Tell me about your project..." required></textarea></div>
-          <button type="submit" class="btn-primary w-full justify-center magnetic-target">Let's Talk Results <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+          <div class="grid sm:grid-cols-2 gap-3 sm:gap-6">
+            <div>
+              <label for="name" class="block text-xs sm:text-sm font-medium mb-1.5 sm:mb-3">Name</label>
+              <input type="text" id="name" name="name" class="input-field" placeholder="Your Name" required>
+            </div>
+            <div>
+              <label for="email" class="block text-xs sm:text-sm font-medium mb-1.5 sm:mb-3">Email</label>
+              <input type="email" id="email" name="email" class="input-field" placeholder="you@company.com" required>
+            </div>
+          </div>
+          <div>
+            <label for="subject" class="block text-xs sm:text-sm font-medium mb-1.5 sm:mb-3">Subject</label>
+            <input type="text" id="subject" name="subject" class="input-field" placeholder="Project Inquiry">
+          </div>
+          <div>
+            <label for="message" class="block text-xs sm:text-sm font-medium mb-1.5 sm:mb-3">Message</label>
+            <textarea id="message" name="message" rows="4" class="input-field resize-none" placeholder="Tell me about your project..." required></textarea>
+          </div>
+          <button type="submit" class="btn-primary w-full justify-center magnetic-target">
+            Let's Talk Results
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
         </form>
       </div>
     </div>
   </section>
 
   <!-- Footer -->
-  <footer class="relative z-10 py-5 sm:py-8 safe-bottom" style="border-top:1px solid var(--border)">
+  <footer class="relative z-10 py-5 sm:py-8" style="border-top: 1px solid var(--border);">
     <div class="max-w-7xl mx-auto px-4 sm:px-6">
       <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
-        <div class="flex items-center gap-2 muted-color text-[10px] sm:text-sm"><span>Designed & Built by</span><span class="font-display font-bold fg-color">Tony Adijah</span></div>
-        <div class="flex items-center gap-3"><a href="https://www.linkedin.com/in/tony-adijah-965903131/" target="_blank" rel="noopener noreferrer" class="muted-color magnetic-target" aria-label="LinkedIn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></a><span class="text-[10px] sm:text-sm muted-color">&copy; 2026 All rights reserved.</span></div>
+        <div class="flex items-center gap-2 muted-color text-[10px] sm:text-sm">
+          <span>Designed & Built by</span>
+          <span class="font-display font-bold fg-color">Tony Adijah</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <a href="https://www.linkedin.com/in/tony-adijah-965903131/" target="_blank" rel="noopener noreferrer" class="muted-color magnetic-target" aria-label="LinkedIn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+          </a>
+          <span class="text-[10px] sm:text-sm muted-color">&copy; 2026 All rights reserved.</span>
+        </div>
       </div>
     </div>
   </footer>
 
+  <!-- JavaScript (loaded at end for performance) -->
   <script src="script.js" defer></script>
 </body>
 </html>
